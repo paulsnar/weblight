@@ -84,8 +84,7 @@ func (es *EventSource) Loop() (error) {
         }
         if ev.Data != nil {
           msg = append(msg, []byte("data: ")...)
-          data := bytes.Replace(ev.Data, []byte("\n"), []byte("\ndata: "), -1)
-          msg = append(msg, data...)
+          msg = append(msg, bytes.Replace(ev.Data, []byte("\n"), []byte("\ndata: "), -1)...)
           msg = append(msg, '\n')
         }
 
