@@ -56,8 +56,11 @@ func _main() int {
 
   http.Handle("/api/1/strand/stream", s)
 
-  go fmt.Printf("listening on :8000\n")
-  http.ListenAndServe(":8000", nil)
+  go fmt.Printf("listening on 127.0.14.1:8000\n")
+  if err := http.ListenAndServe("127.0.14.1:8000", nil); err != nil {
+    fmt.Printf("error: %s\n", err)
+    return 1
+  }
   return 0
 }
 
