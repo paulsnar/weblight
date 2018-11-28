@@ -35,6 +35,25 @@ func _main() int {
     w.WriteHeader(http.StatusAccepted)
   })
 
+  http.HandleFunc("/api/1/stop", func(w http.ResponseWriter, r *http.Request) {
+    if r.Method != "POST" {
+      w.Header().Set("Content-Type", "text/plain; charset=UTF-8")
+      w.WriteHeader(http.StatusMethodNotAllowed)
+      w.Write([]byte("this endpoint requires POST\n"))
+      return
+    }
+
+    if s.CurrentStrand == nil {
+      w.Header().Set("Content-Type", "text/plain; charset=UTF-8")
+      w.WriteHeader(http.StatusBadRequest)
+      w.Write([]byte("strand is not connected\n"))
+      return
+    }
+
+    s.CurrentStrand.SendStop()
+    w.WriteHeader(http.StatusAccepted)
+  })
+
   http.Handle("/api/1/strand/stream", s)
 
   go fmt.Printf("listening on :8000\n")

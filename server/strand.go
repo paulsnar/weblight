@@ -24,6 +24,10 @@ func (s *Strand) SendProgram(prog []byte) {
   s.es.Events <- Event{Event: "reprogram", Data: prog}
 }
 
+func (s *Strand) SendStop() {
+  s.es.Events <- Event{Event: "off", Data: nil}
+}
+
 type StrandManager struct {
   CurrentStrand *Strand
 }
