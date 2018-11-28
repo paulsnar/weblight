@@ -44,4 +44,9 @@ class Request
   {
     return new static('GET', $url, null);
   }
+
+  public static function post(string $url, $body = null)
+  {
+    return new static('POST', $url, $body);
+  }
 }
