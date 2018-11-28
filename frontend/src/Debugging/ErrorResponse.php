@@ -24,7 +24,8 @@ class ErrorResponse extends Response
       } else {
         $call = $traceLine['function'];
       }
-      $body .= sprintf("%2d: %s (%s:%d)\n", $i, $call, $traceLine['file'], $traceLine['line']);
+      $body .= sprintf("%2d: %s (%s:%s)\n",
+        $i, $call, $traceLine['file'] ?? '??', $traceLine['line'] ?? '??');
     }
 
     parent::__construct(Response::HTTP_INTERNAL_SERVER_ERROR, [

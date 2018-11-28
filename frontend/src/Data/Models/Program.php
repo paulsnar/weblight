@@ -2,7 +2,18 @@
 
 namespace PN\Weblight\Data\Models;
 
-class Program
+use PN\Weblight\Data\BaseModel;
+
+class Program extends BaseModel implements \JsonSerializable
 {
   public $id, $ref, $revision, $content;
+
+  public function jsonSerialize()
+  {
+    $json = [ 'id' => $this->ref, 'revision' => $this->revision ];
+    if (isset($this->content)) {
+      $json['content'] = $this->content;
+    }
+    return $json;
+  }
 }

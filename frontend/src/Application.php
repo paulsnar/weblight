@@ -2,25 +2,43 @@
 
 namespace PN\Weblight;
 
-use PN\Weblight\Core\{Configuration, DependencyContainer, Router};
+use PN\Weblight\Core\{AppContext, Configuration, DependencyContainer, Router};
 use PN\Weblight\Debugging\ErrorResponse as DebugErrorResponse;
 use PN\Weblight\Core\Routing\{Route, ControllerHandler};
 use PN\Weblight\Curl\{Request as CurlRequest, Session as CurlSession};
 
-use PN\Weblight\HTTP\{DefaultResponses, Request};
+use PN\Weblight\HTTP\{DefaultResponses, HTTPSerializable, Request};
 use PN\Weblight\Controllers\IndexController;
+use PN\Weblight\Controllers\API\{ProgramController as APIProgramController,
+  StrandController as APIStrandController};
 
 class Application
 {
-  public $config, $dc;
+  public $config, $dc, $ctx;
 
   public function __construct()
   {
     $this->dc = new DependencyContainer();
     $this->config = $this->dc->get(Configuration::class);
 
+    $this->ctx = new AppContext($this->dc);
+
     $this->routing = new Router($this->config, [
       new Route('GET', '/', new ControllerHandler(IndexController::class, 'frontpage')),
+
+      new Route('GET', '/api/1/programs',
+        new ControllerHandler(APIProgramController::class, 'getProgramList')),
+      new Route('POST', '/api/1/programs',
+        new ControllerHandler(APIProgramController::class, 'createProgram')),
+      new Route('GET', '/api/1/programs/{program:[a-z0-9]{8}}',
+        new ControllerHandler(APIProgramController::class, 'getProgram')),
+      new Route('PUT', '/api/1/programs/{program:[a-z0-9]{8}}',
+        new ControllerHandler(APIProgramController::class, 'updateProgram')),
+      new Route('DELETE', '/api/1/programs/{program:[a-z0-9]{8}}',
+        new ControllerHandler(APIProgramController::class, 'deleteProgram')),
+
+      new Route('POST', '/api/1/strand/deploy',
+        new ControllerHandler(APIStrandController::class, 'deployProgram')),
     ]);
 
     set_error_handler(function ($severity, $message, $file, $line) {
@@ -34,13 +52,15 @@ class Application
 
     try {
       $request = Request::fromGlobals();
-      [ $context, $method ] = $this->routing->dispatch($request);
-
-      if ($context !== null) {
-        $response = $this->dc->invoke($context, $method, $request);
+      $invokable = $this->routing->dispatch($request);
+      if (is_array($invokable)) {
+        $controller = $this->dc->get($invokable[0]);
+        $response = $controller->invoke($this->ctx, $invokable[1], $request);
       } else {
-        $response = $method($request);
+        $response = $invokable($request);
       }
+    } catch (HTTPSerializable $e) {
+      $response = $e->httpSerialize($request);
     } catch (\Throwable $e) {
       if ($this->config->values['debug'] ?? false) {
         $response = new DebugErrorResponse($e);
@@ -52,13 +72,5 @@ class Application
         $response->send();
       }
     }
-  }
-
-  public function handle(CurlSession $ch)
-  {
-    $rq = CurlRequest::get('http://127.0.14.1:8000/api/1/program');
-    $resp = $ch->perform($rq);
-    header('Content-Type: text/plain; charset=UTF-8');
-    var_dump($resp);
   }
 }

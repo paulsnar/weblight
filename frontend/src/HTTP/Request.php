@@ -6,7 +6,7 @@ use PN\Weblight\Utilities\ImmutableBag;
 
 class Request
 {
-  public $method, $path, $headers, $query, $form, $files, $cookies, $arguments = [ ];
+  public $method, $path, $headers, $query, $body, $form, $files, $cookies, $arguments = [ ];
 
   public static function fromGlobals()
   {
@@ -26,6 +26,11 @@ class Request
     }
     $rq->path = $path;
     $rq->query = new ImmutableBag($query);
+
+    if ($rq->method !== 'HEAD' &&
+        $rq->method !== 'GET') {
+      $rq->body = file_get_contents('php://input');
+    }
 
     $rq->form = new ImmutableBag($_POST);
     $rq->files = new ImmutableBag($_FILES);

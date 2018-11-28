@@ -7,6 +7,7 @@ use function FastRoute\simpleDispatcher;
 
 use PN\Weblight\Core\Routing\ControllerHandler;
 use PN\Weblight\HTTP\{Request, DefaultResponses};
+use function PN\Weblight\str_starts_with;
 
 class Router
 {
@@ -25,7 +26,7 @@ class Router
 
   public function dispatch(Request $rq)
   {
-    if (strpos($rq->path, $this->config['prefix']) === 0) {
+    if (str_starts_with($this->config['prefix'], $rq->path)) {
       $rq->path = substr($rq->path, strlen($this->config['prefix']));
     }
 

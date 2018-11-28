@@ -19,13 +19,18 @@ class Database
     $this->db = new \PDO("sqlite:{$filepath}");
   }
 
+  public function lastInsertId()
+  {
+    return $this->db->lastInsertId();
+  }
+
   public function transaction($callback)
   {
     $this->db->beginTransaction();
     $committed = false;
 
     try {
-      $callback();
+      $result = $callback();
       $this->db->commit();
       $committed = true;
     } catch (TransactionRollbackException $e) {
@@ -35,6 +40,8 @@ class Database
         $this->db->rollback();
       }
     }
+
+    return $result;
   }
 
   public function query($query, $params = [ ])
@@ -48,7 +55,16 @@ class Database
       if (is_integer($key)) {
         $key += 1;
       }
-      $q->bindValue($kye, $value);
+      $type = \PDO::PARAM_STR;
+      if (is_integer($value)) {
+        $type = \PDO::PARAM_INT;
+      } else if (is_bool($value)) {
+        $type = \PDO::PARAM_BOOL;
+        $value = $value ? '1' : '0';
+      } else if ($value === null) {
+        $type = \PDO::PARAM_NULL;
+      }
+      $q->bindValue($key, $value, $type);
     }
 
     $ok = $q->execute();
