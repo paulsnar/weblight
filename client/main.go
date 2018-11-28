@@ -18,6 +18,9 @@ func main() {
   es.Handlers["reprogram"] = func(ev *Event) error {
     if p != nil {
       p.Signal(syscall.SIGTERM)
+      if _, err := p.Wait(); err != nil {
+        return err
+      }
       p = nil
     }
 
@@ -39,9 +42,6 @@ func main() {
       }
       if err := write.Close(); err != nil {
         fmt.Printf("background program write(end): %s\n", err)
-      }
-      if _, err := p.Wait(); err != nil {
-        fmt.Printf("background program reap: %s\n", err)
       }
     }()
 
