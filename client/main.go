@@ -4,6 +4,7 @@ import (
   "fmt"
   "os"
   "syscall"
+  "time"
 )
 
 func main() {
@@ -15,6 +16,20 @@ func main() {
 
   var p *os.Process
 
+  go func() {
+    t := time.NewTicker(30 * time.Second)
+    defer t.Stop()
+
+    for {
+      // ensure that the strand stays off
+      <-t.C
+      if p == nil {
+        pa := new(os.ProcAttr)
+        pa.Files = []*os.File{os.Stdin, os.Stdout, os.Stderr}
+        os.StartProcess("./lb2", []string{"./lb2", "/dev/null"}, pa)
+      }
+    }
+  }()
   es.Handlers["reprogram"] = func(ev *Event) error {
     if p != nil {
       p.Signal(syscall.SIGTERM)
