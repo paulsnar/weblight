@@ -1,7 +1,6 @@
 package main
 
 import (
-  "bytes"
   "context"
   "errors"
   "net/http"
@@ -11,8 +10,9 @@ import (
 )
 
 type Event struct {
-  ID, Event string
-  Data []byte
+  ID    string `json:"id"`
+  Event string `json:"event"`
+  Data  string `json:"data"`
   Retry *int
 }
 
@@ -82,9 +82,10 @@ func (es *EventSource) Loop() (error) {
           retry := strconv.FormatInt(int64(*ev.Retry), 10)
           msg = append(msg, []byte("retry: " + retry + "\n")...)
         }
-        if ev.Data != nil {
+        if ev.Data != "" {
           msg = append(msg, []byte("data: ")...)
-          msg = append(msg, bytes.Replace(ev.Data, []byte("\n"), []byte("\ndata: "), -1)...)
+          data := strings.Replace(ev.Data, "\n", "\ndata: ", -1)
+          msg = append(msg, []byte(data)...)
           msg = append(msg, '\n')
         }
 
