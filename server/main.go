@@ -10,9 +10,8 @@ import (
 func _main() int {
   s := new(StrandManager)
 
-  mux := http.NewServeMux()
 
-  mux.HandleFunc("/api/1/program", func(w http.ResponseWriter, r *http.Request) {
+  http.HandleFunc("/api/1/program", func(w http.ResponseWriter, r *http.Request) {
     if r.Method != "PUT" {
       w.Header().Set("Content-Type", "text/plain; charset=UTF-8")
       w.WriteHeader(http.StatusMethodNotAllowed)
@@ -36,10 +35,10 @@ func _main() int {
     w.WriteHeader(http.StatusAccepted)
   })
 
-  mux.Handle("/api/1/strand/stream", s)
+  http.Handle("/api/1/strand/stream", s)
 
   go fmt.Printf("listening on :8000\n")
-  http.ListenAndServe(":8000", mux)
+  http.ListenAndServe(":8000", nil)
   return 0
 }
 
