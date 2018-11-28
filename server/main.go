@@ -10,6 +10,11 @@ import (
 func _main() int {
   s := new(StrandManager)
 
+  http.HandleFunc("/sanity-check", func(w http.ResponseWriter, r *http.Request) {
+    w.Header().Set("Content-Type", "text/plain; charset=UTF-8")
+    w.WriteHeader(http.StatusOK)
+    w.Write([]byte("ok"))
+  })
 
   http.HandleFunc("/api/1/program", func(w http.ResponseWriter, r *http.Request) {
     if r.Method != "PUT" {
