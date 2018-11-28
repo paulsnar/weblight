@@ -6,7 +6,7 @@ use PN\Weblight\HTTP\{Request, Response};
 
 class IndexController
 {
-  public function frontpage(Request $rq)
+  public function frontpage(AppContext $ctx, Request $rq)
   {
     return new Response(Response::HTTP_OK, [
       'Content-Type' => 'text/plain; charset=UTF-8',

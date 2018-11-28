@@ -5,9 +5,9 @@ namespace PN\Weblight\Controllers\API;
 use PN\Weblight\API\NotImplementedException;
 use PN\Weblight\HTTP\Request;
 
-class StrandController
+class StrandController extends BaseAPIController
 {
-  public function deployProgram(Request $rq)
+  public function __construct(CurlSession $ch, ProgramStorageService $ps)
   {
     // TODO
     throw new NotImplementedException();

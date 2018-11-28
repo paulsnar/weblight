@@ -3,6 +3,7 @@
 namespace PN\Weblight\Controllers\API;
 
 use PN\Weblight\API\{BaseAPIController, ErrorResponse, NotImplementedException, Response};
+use PN\Weblight\Core\AppContext;
 use PN\Weblight\Data\Models\Program;
 use PN\Weblight\Errors\SentinelMismatchException;
 use PN\Weblight\HTTP\{Request, Response as HTTPResponse};
@@ -17,20 +18,20 @@ class ProgramController extends BaseAPIController
     $this->programs = $ps;
   }
 
-  public function getProgramList(Request $rq)
+  public function getProgramList(AppContext $ctx, Request $rq)
   {
     $programs = $this->programs->getProgramStubList();
     return new Response($programs);
   }
 
-  public function createProgram(Request $rq)
+  public function createProgram(AppContext $ctx, Request $rq)
   {
     $program = $this->programs->createProgram($rq->body);
     unset($program->content);
     return new Response($program);
   }
 
-  public function getProgram(Request $rq)
+  public function getProgram(AppContext $ctx, Request $rq)
   {
     $revision = $rq->query['revision'] ?? 'latest';
 
@@ -54,7 +55,7 @@ class ProgramController extends BaseAPIController
     ], $program->content);
   }
 
-  public function updateProgram(Request $rq)
+  public function updateProgram(AppContext $ctx, Request $rq)
   {
     $revision = $rq->query['revision'];
     if ($revision === null) {
@@ -80,7 +81,7 @@ class ProgramController extends BaseAPIController
     return new Response($program);
   }
 
-  public function deleteProgram(Request $rq)
+  public function deleteProgram(AppContext $ctx, Request $rq)
   {
     // TODO???
     throw new NotImplementedException();

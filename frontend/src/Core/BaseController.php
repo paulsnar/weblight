@@ -9,6 +9,6 @@ class BaseController
 {
   public function invoke(AppContext $ctx, string $method, Request $request): Response
   {
-    return $this->$method($request);
+    return $this->$method($ctx, $request);
   }
 }
