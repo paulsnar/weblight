@@ -61,7 +61,7 @@ func main() {
 
     pa := new(os.ProcAttr)
     pa.Files = []*os.File{read, os.Stdout, os.Stderr}
-    p, err = os.StartProcess("/usr/bin/lightbridge", []string{"/usr/bin/lightbridge", "-"}, pa)
+    p, err = os.StartProcess("./lb2", []string{"./lb2", "-"}, pa)
     if err != nil {
       return err
     }
