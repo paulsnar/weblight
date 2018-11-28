@@ -50,6 +50,7 @@ func (es *EventSource) Loop() (error) {
   h := c.Header()
   h.Set("Content-Type", "text/event-stream")
   c.WriteHeader(http.StatusOK)
+  c.Write([]byte(":\n"))
   c.Flush()
 
   t := time.NewTicker(15 * time.Second)
