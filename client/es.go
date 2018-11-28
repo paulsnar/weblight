@@ -160,7 +160,7 @@ func (es *EventSource) Loop() error {
       break
     }
 
-    if handler, ok := es.Handlers[ev.Event]; ok {
+    if handler := es.Handlers[ev.Event]; handler != nil {
       if err := handler(ev); err != nil {
         es.Close()
         return err
