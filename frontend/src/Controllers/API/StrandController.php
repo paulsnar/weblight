@@ -6,16 +6,16 @@ use PN\Weblight\API\{BaseAPIController, ErrorResponse, NotImplementedException};
 use PN\Weblight\Core\AppContext;
 use PN\Weblight\Curl\{Request as CurlRequest, Session as CurlSession};
 use PN\Weblight\HTTP\{Request as HTTPRequest, Response as HTTPResponse};
-use PN\Weblight\Services\ProgramStorageService;
+use PN\Weblight\Services\StrandService;
 
 class StrandController extends BaseAPIController
 {
-  protected $ch, $programs;
+  protected $ch, $strand;
 
-  public function __construct(CurlSession $ch, ProgramStorageService $ps)
+  public function __construct(CurlSession $ch, StrandService $strand)
   {
     $this->ch = $ch;
-    $this->programs = $ps;
+    $this->strand = $strand;
   }
 
   public function deployProgram(AppContext $ctx, HTTPRequest $rq)
@@ -26,26 +26,30 @@ class StrandController extends BaseAPIController
     }
 
     $revision = $rq->form['revision'] ?? null;
-    if ($revision === null) {
-      $program = $this->programs->getLatestProgram($ref);
-    } else {
+    if ($revision !== null) {
       if ( ! ctype_digit($revision)) {
         return new ErrorResponse(HTTPResponse::HTTP_BAD_REQUEST, 'Malformed revision number');
       }
       $revision = intval($revision, 10);
-      $program = $this->programs->getProgram($ref, $revision);
     }
 
-    $rq = CurlRequest::post('http://127.0.14.1:8000/submit', json_encode([
-      'event' => 'reprogram',
-      'data' => $program->content,
-    ], \JSON_UNESCAPED_SLASHES));
-    $resp = $this->ch->perform($rq);
-    if ($resp->status !== HTTPResponse::HTTP_CREATED) {
-      $ctx->log([ 'type' => 'event-failure', 'result' => $resp->body ]);
-      return new ErrorResponse(HTTPResponse::HTTP_INTERNAL_SERVER_ERROR, 'Internal error');;
+    try {
+      $this->strand->deployProgram($ref, $revision);
+      return new HTTPResponse(HTTPResponse::HTTP_CREATED);
+    } catch (\Throwable $e) {
+      $ctx->log([ 'type' => 'event-failure', 'result' => $e->getMessage() ]);
+      return new ErrorResponse(HTTPResponse::HTTP_INTERNAL_SERVER_ERROR, 'Internal error');
     }
+  }
 
-    return new HTTPResponse(HTTPResponse::HTTP_CREATED);
+  public function powerOff(AppContext $ctx, HTTPRequest $rq)
+  {
+    try {
+      $this->strand->powerOff();
+      return new HTTPResponse(HTTPResponse::HTTP_ACCEPTED);
+    } catch (\Throwable $e) {
+      $ctx->log([ 'type' => 'event-failure', 'result' => $e->getMessage() ]);
+      return new ErrorResponse(HTTPResponse::HTTP_INTERNAL_SERVER_ERROR, 'Internal error');
+    }
   }
 }

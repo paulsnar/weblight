@@ -39,6 +39,8 @@ class Application
 
       new Route('POST', '/api/1/strand/deploy',
         new ControllerHandler(APIStrandController::class, 'deployProgram')),
+      new Route('POST', '/api/1/strand/poweroff',
+        new ControllerHandler(APIStrandController::class, 'powerOff')),
     ]);
 
     set_error_handler(function ($severity, $message, $file, $line) {
