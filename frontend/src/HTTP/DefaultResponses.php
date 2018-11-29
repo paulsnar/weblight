@@ -20,6 +20,12 @@ const MESSAGE_GENERIC_ERROR = <<<'HTML'
 
 HTML;
 
+const MESSAGE_FORBIDDEN = <<<'HTML'
+<!DOCTYPE html>
+<article>Sorry, you are forbidden from doing that.</article>
+
+HTML;
+
 class DefaultResponses
 {
   public static function notFound()
@@ -27,6 +33,13 @@ class DefaultResponses
     return new Response(Response::HTTP_NOT_FOUND, [
       'Content-Type' => 'text/html; charset=UTF-8',
     ], MESSAGE_NOT_FOUND);
+  }
+
+  public static function forbidden()
+  {
+    return new Response(Response::HTTP_FORBIDDEN, [
+      'Content-Type' => 'text/html; charset=UTF-8',
+    ], MESSAGE_FORBIDDEN);
   }
 
   public static function methodNotAllowed()

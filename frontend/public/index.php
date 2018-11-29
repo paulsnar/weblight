@@ -2,6 +2,12 @@
 
 namespace PN\Weblight;
 
+if (\PHP_SAPI === 'cli-server') {
+  if (is_file(__DIR__ . parse_url($_SERVER['REQUEST_URI'])['path'])) {
+    return false;
+  }
+}
+
 function path_join(...$parts) {
   return implode(DIRECTORY_SEPARATOR, $parts);
 }

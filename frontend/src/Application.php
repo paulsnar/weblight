@@ -3,14 +3,15 @@
 namespace PN\Weblight;
 
 use PN\Weblight\Core\{AppContext, Configuration, DependencyContainer, Router};
-use PN\Weblight\Debugging\ErrorResponse as DebugErrorResponse;
-use PN\Weblight\Core\Routing\{Route, ControllerHandler};
+use PN\Weblight\Core\Routing\{Route, ControllerHandler, StaticServeHandler};
 use PN\Weblight\Curl\{Request as CurlRequest, Session as CurlSession};
-
+use PN\Weblight\Debugging\ErrorResponse as DebugErrorResponse;
 use PN\Weblight\HTTP\{DefaultResponses, HTTPSerializable, Request};
 use PN\Weblight\Controllers\IndexController;
 use PN\Weblight\Controllers\API\{ProgramController as APIProgramController,
   StrandController as APIStrandController};
+use const PN\Weblight\ROOT_PUBLIC;
+use function PN\Weblight\path_join;
 
 class Application
 {
@@ -41,6 +42,9 @@ class Application
         new ControllerHandler(APIStrandController::class, 'deployProgram')),
       new Route('POST', '/api/1/strand/poweroff',
         new ControllerHandler(APIStrandController::class, 'powerOff')),
+
+      new Route('GET', '/static/{file:.+}',
+        new StaticServeHandler(path_join(ROOT_PUBLIC, 'static'))),
     ]);
 
     set_error_handler(function ($severity, $message, $file, $line) {
@@ -55,7 +59,7 @@ class Application
     try {
       $request = Request::fromGlobals();
       [ $context, $method ] = $this->routing->dispatch($request);
-      if ($context !== null) {
+      if (is_string($context)) {
         $controller = $this->dc->get($context);
         $response = $controller->invoke($this->ctx, $method, $request);
       } else {

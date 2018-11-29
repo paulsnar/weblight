@@ -61,3 +61,17 @@ function maskpos(string $haystack, string $needles, int $offset = 0) {
 
   return $min;
 }
+
+function path_normalize(string $path) {
+  $safePath = [ ];
+  foreach (explode('/', $path) as $component) {
+    if ($component === '..') {
+      array_pop($safePath);
+    } else if ($component === '.' || $component === '') {
+      continue;
+    } else {
+      $safePath[] = $component;
+    }
+  }
+  return implode(DIRECTORY_SEPARATOR, $safePath);
+}

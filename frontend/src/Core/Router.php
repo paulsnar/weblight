@@ -5,7 +5,7 @@ namespace PN\Weblight\Core;
 use FastRoute\{Dispatcher as FRDispatcher, RouteCollector};
 use function FastRoute\simpleDispatcher;
 
-use PN\Weblight\Core\Routing\ControllerHandler;
+use PN\Weblight\Core\Routing\{ControllerHandler, StaticServeHandler};
 use PN\Weblight\HTTP\{Request, DefaultResponses};
 use function PN\Weblight\str_starts_with;
 
@@ -56,6 +56,8 @@ class Router
 
     if ($handler instanceof ControllerHandler) {
       return [ $handler->controller, $handler->method ];
+    } else if ($handler instanceof StaticServeHandler) {
+      return [ null, [ $handler, 'handle' ] ];
     }
 
     if ( ! is_callable($handler)) {
