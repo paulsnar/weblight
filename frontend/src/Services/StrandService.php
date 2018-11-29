@@ -24,6 +24,11 @@ class StrandService
     $this->strandEventPusher->sendEvent('launch', "{$ref}-{$revision}");
   }
 
+  public function redeployLastProgram()
+  {
+    $this->strandEventPusher->sendEvent('launch-last');
+  }
+
   public function powerOff()
   {
     $this->strandEventPusher->sendEvent('off');

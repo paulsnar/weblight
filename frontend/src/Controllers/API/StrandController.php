@@ -43,6 +43,17 @@ class StrandController extends BaseAPIController
     }
   }
 
+  public function redeployPreviousProgram(AppContext $ctx, HTTPRequest $rq)
+  {
+    try {
+      $this->strand->redeployLastProgram();
+      return new HTTPResponse(HTTPResponse::HTTP_ACCEPTED);
+    } catch (EventSubmissionError $e) {
+      $ctx->log([ 'type' => 'event-failure', 'result' => $e->getMessage() ]);
+      return new ErrorResponse(HTTPResponse::HTTP_INTERNAL_SERVER_ERROR, 'Internal error');
+    }
+  }
+
   public function powerOff(AppContext $ctx, HTTPRequest $rq)
   {
     try {

@@ -40,6 +40,8 @@ class Application
 
       new Route('POST', '/api/1/strand/deploy',
         new ControllerHandler(APIStrandController::class, 'deployProgram')),
+      new Route('POST', '/api/1/strand/redeploy',
+        new ControllerHandler(APIStrandController::class, 'redeployPreviousProgram')),
       new Route('POST', '/api/1/strand/poweroff',
         new ControllerHandler(APIStrandController::class, 'powerOff')),
 
