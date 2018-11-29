@@ -52,12 +52,12 @@ class Application
 
     try {
       $request = Request::fromGlobals();
-      $invokable = $this->routing->dispatch($request);
-      if (is_array($invokable)) {
-        $controller = $this->dc->get($invokable[0]);
-        $response = $controller->invoke($this->ctx, $invokable[1], $request);
+      [ $context, $method ] = $this->routing->dispatch($request);
+      if ($context !== null) {
+        $controller = $this->dc->get($context);
+        $response = $controller->invoke($this->ctx, $method, $request);
       } else {
-        $response = $invokable($request);
+        $response = $method($request);
       }
     } catch (HTTPSerializable $e) {
       $response = $e->httpSerialize($request);
