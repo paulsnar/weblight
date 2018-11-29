@@ -31,9 +31,18 @@ func ExitLightbridge(p *os.Process) error {
   }
 }
 
-func LaunchLightbridge(stdin, stdout, stderr *os.File) (p *os.Process, err error) {
-  pa := new(os.ProcAttr)
-  pa.Files = []*os.File{stdin, stdout, stderr}
-  p, err = os.StartProcess("./lb2", []string{"./lb2", "-"}, pa)
+func LaunchLightbridge(programPath string) (p *os.Process, err error) {
+  p, err = os.StartProcess("./lb2", []string{"./lb2", programPath}, &os.ProcAttr{
+    Files: []*os.File{os.Stdin, os.Stdout, os.Stderr},
+  })
+
+  go func() {
+    // refresh last-modified timestamp
+    f, _ := os.OpenFile(programPath, os.O_RDWR, 0644)
+    if f != nil {
+      f.Close()
+    }
+  }()
+
   return
 }

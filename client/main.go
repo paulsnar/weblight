@@ -5,12 +5,12 @@ import (
   "os"
   "strconv"
   "strings"
-  "syscall"
   "time"
 )
 
 func main() {
-  es, err := NewEventSource("https://wl.xn--t-oha.lv/api/1-realtime/strand")
+  // es, err := NewEventSource("https://wl.xn--t-oha.lv/api/1-realtime/strand")
+  es, err := NewEventSource("http://127.0.14.1:8000/consume")
   if err != nil {
     panic(err)
   }
@@ -18,8 +18,6 @@ func main() {
 
   var p *os.Process
   strandOn := false
-
-  cache := NewProgramCache()
 
   go func() {
     t := time.NewTicker(30 * time.Second)
@@ -29,23 +27,47 @@ func main() {
       // ensure that the strand stays off
       <-t.C
       if !strandOn {
-        pa := new(os.ProcAttr)
-        pa.Files = []*os.File{os.Stdin, os.Stdout, os.Stderr}
-        os.StartProcess("./lb2", []string{"./lb2", "/dev/null"}, pa)
+        p, _ := LaunchLightbridge("/dev/null")
+        if p != nil {
+          p.Wait()
+        }
       }
     }
   }()
 
   es.Handlers["off"] = func(ev *Event) error {
     if p != nil {
-      p.Signal(syscall.SIGTERM)
-      if _, err := p.Wait(); err != nil {
+      if err := ExitLightbridge(p); err != nil {
         return err
       }
       p = nil
     }
 
     strandOn = false
+    return nil
+  }
+
+  es.Handlers["launch-last"] = func(ev *Event) error {
+    if p != nil {
+      if err := ExitLightbridge(p); err != nil {
+        return err
+      }
+      p = nil
+    }
+
+    program := cacheFindLastProgram()
+    if program == "" {
+      // should report failure?
+      return nil
+    }
+
+    var err error
+    p, err = LaunchLightbridge(program)
+    if err != nil {
+      return err
+    }
+
+    strandOn = true
     return nil
   }
 
@@ -61,12 +83,22 @@ func main() {
 
     programId := ProgramID{programSpecifier[0], uint(rev)}
 
-    program := cache.Recall(programId)
-    if program == nil {
-      program, err = FetchProgram(programId)
+    if cacheHasProgram(programId) {
+      p, err = LaunchLightbridge(programId.FullPath())
       if err != nil {
         return err
       }
+
+      return nil
+    }
+
+    program, err := FetchProgram(programId)
+    if err != nil {
+      return err
+    }
+    programPath, err := cacheStoreProgram(programId, program)
+    if err != nil {
+      return err
     }
 
     if p != nil {
@@ -76,26 +108,12 @@ func main() {
       p = nil
     }
 
-    read, write, err := os.Pipe()
-    if err != nil {
-      return err
-    }
-
-    p, err = LaunchLightbridge(read, os.Stdout, os.Stderr)
+    p, err = LaunchLightbridge(programPath)
     if err != nil {
       return err
     }
 
     strandOn = true
-    go func() {
-      if _, err := write.Write([]byte(program)); err != nil {
-        fmt.Printf("background program write: %s\n", err)
-      }
-      if err := write.Close(); err != nil {
-        fmt.Printf("background program write(end): %s\n", err)
-      }
-    }()
-
     return nil
   }
 
@@ -104,3 +122,4 @@ func main() {
     os.Exit(1)
   }
 }
+

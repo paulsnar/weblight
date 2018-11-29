@@ -6,7 +6,7 @@ import (
   "net/http"
 )
 
-func FetchProgram(id ProgramID) (Program, error) {
+func FetchProgram(id ProgramID) ([]byte, error) {
   url := fmt.Sprintf("https://wl.xn--t-oha.lv/api/1/programs/%s?revision=%d",
     id.ID, id.Revision)
   resp, err := http.Get(url)
@@ -20,5 +20,5 @@ func FetchProgram(id ProgramID) (Program, error) {
     return nil, err
   }
 
-  return Program(b.Bytes()), nil
+  return b.Bytes(), nil
 }
