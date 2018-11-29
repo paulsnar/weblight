@@ -37,4 +37,15 @@ class StrandEventPusherService
       throw new EventSubmissionError($resp->body);
     }
   }
+
+  public function isConnected()
+  {
+    $rq = Request::get(static::EVENT_SERVER_ADDRESS . '/connected');
+    $resp = $this->ch->perform($rq);
+    if ($resp->status !== Response::HTTP_OK) {
+      throw new \Exception("Backend is not working properly: {$resp->body}");
+    }
+
+    return json_decode($resp->body, true);
+  }
 }
