@@ -2,6 +2,12 @@
 
 namespace PN\Weblight\Errors;
 
-class NotFoundException extends \Exception
+use PN\Weblight\HTTP\{DefaultResponses, HTTPSerializable, Request, Response};
+
+class NotFoundException extends \Exception implements HTTPSerializable
 {
+  public function httpSerialize(Request $rq): Response
+  {
+    return DefaultResponses::notFound();
+  }
 }

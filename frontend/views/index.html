@@ -1,5 +1,58 @@
 {% extends "layouts/default.html" %}
 
 {% block body %}
-  <p>Hello, world!</p>
+<div class="narrow-container">
+  <h1 style="text-align: center">💡🌐 <br><span class="h-small">weblight</span></h1>
+  <p style="text-align: center">
+  {% if connected %}
+    <span class="str-conn str-conn--connected">lenta ir savienota</span>
+  {% else %}
+    <span class="str-conn str-conn--disconnected">nav savienojuma ar lentu</span>
+  {% endif %}
+
+  <p>
+    <button class="button" id="js-deploy-last">palaist pēdējo programmu</button>
+    <button class="button" id="js-power-off">izslēgt lentu</button>
+  </p>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    "use strict";
+
+    var $deployLast = document.getElementById('js-deploy-last'),
+        $powerOff = document.getElementById('js-power-off')
+
+    var _executing = false
+
+    document.getElementById('js-deploy-last').addEventListener('click', function(e) {
+      e.preventDefault()
+      if (_executing) { return }
+
+      var body = new FormData()
+      fetch('/api/1/strand/redeploy', { method: 'POST', body: body })
+        .then(function() {
+          _executing = false
+        }, function(e) {
+          _executing = false
+          return Promise.reject(e)
+        })
+    })
+
+    document.getElementById('js-power-off').addEventListener('click', function(e) {
+      e.preventDefault()
+      if (_executing) { return }
+
+      _executing = true
+
+      fetch('/api/1/strand/poweroff', { method: 'POST' })
+        .then(function() {
+          _executing = false
+        }, function(e) {
+          _executing = false
+          return Promise.reject(e)
+        })
+    })
+  })
+</script>
 {% endblock %}
