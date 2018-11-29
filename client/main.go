@@ -3,12 +3,14 @@ package main
 import (
   "fmt"
   "os"
+  "strconv"
+  "strings"
   "syscall"
   "time"
 )
 
 func main() {
-  es, err := NewEventSource("http://localhost:8000/api/1/strand/stream")
+  es, err := NewEventSource("https://wl.xn--t-oha.lv/api/1-realtime/strand")
   if err != nil {
     panic(err)
   }
@@ -16,6 +18,8 @@ func main() {
 
   var p *os.Process
   strandOn := false
+
+  cache := NewProgramCache()
 
   go func() {
     t := time.NewTicker(30 * time.Second)
@@ -45,10 +49,28 @@ func main() {
     return nil
   }
 
-  es.Handlers["reprogram"] = func(ev *Event) error {
+  es.Handlers["launch"] = func(ev *Event) error {
+    programSpecifier := strings.Split(string(ev.Data), "-")
+    if len(programSpecifier) != 2 {
+      return fmt.Errorf("invalid program specifier: %s", ev.Data)
+    }
+    rev, err := strconv.ParseUint(programSpecifier[1], 10, 64)
+    if err != nil {
+      return err
+    }
+
+    programId := ProgramID{programSpecifier[0], uint(rev)}
+
+    program := cache.Recall(programId)
+    if program == nil {
+      program, err = FetchProgram(programId)
+      if err != nil {
+        return err
+      }
+    }
+
     if p != nil {
-      p.Signal(syscall.SIGTERM)
-      if _, err := p.Wait(); err != nil {
+      if err := ExitLightbridge(p); err != nil {
         return err
       }
       p = nil
@@ -59,17 +81,14 @@ func main() {
       return err
     }
 
-    pa := new(os.ProcAttr)
-    pa.Files = []*os.File{read, os.Stdout, os.Stderr}
-    p, err = os.StartProcess("./lb2", []string{"./lb2", "-"}, pa)
+    p, err = LaunchLightbridge(read, os.Stdout, os.Stderr)
     if err != nil {
       return err
     }
 
     strandOn = true
-
     go func() {
-      if _, err := write.Write(ev.Data); err != nil {
+      if _, err := write.Write([]byte(program)); err != nil {
         fmt.Printf("background program write: %s\n", err)
       }
       if err := write.Close(); err != nil {
