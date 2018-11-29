@@ -18,7 +18,7 @@ class StrandService
   public function deployProgram(string $ref, ?int $revision = null)
   {
     if ($revision === null) {
-      $this->programs->getLatestRevision($ref);
+      $revision = $this->programs->getLatestRevision($ref);
     }
 
     $this->strandEventPusher->sendEvent('launch', "{$ref}-{$revision}");
