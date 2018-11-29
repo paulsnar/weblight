@@ -3,6 +3,7 @@
 namespace PN\Weblight\Data;
 
 use PN\Weblight\Core\Configuration;
+use PN\Weblight\Data\Database\PDOStub;
 
 class Database
 {
@@ -16,7 +17,7 @@ class Database
     }
 
     $filepath = $config['path'] ?? ':memory:';
-    $this->db = new \PDO("sqlite:{$filepath}");
+    $this->db = new PDOStub("sqlite:{$filepath}");
   }
 
   public function lastInsertId()

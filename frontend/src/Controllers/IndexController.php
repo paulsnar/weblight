@@ -2,9 +2,10 @@
 
 namespace PN\Weblight\Controllers;
 
+use PN\Weblight\Core\{AppContext, BaseController};
 use PN\Weblight\HTTP\{Request, Response};
 
-class IndexController
+class IndexController extends BaseController
 {
   public function frontpage(AppContext $ctx, Request $rq)
   {

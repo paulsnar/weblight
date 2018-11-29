@@ -18,12 +18,10 @@ class StrandService
   public function deployProgram(string $ref, ?int $revision = null)
   {
     if ($revision === null) {
-      $program = $this->programs->getLatestProgram($ref);
-    } else {
-      $program = $this->programs->getProgram($ref, $revision);
+      $this->programs->getLatestRevision($ref);
     }
 
-    $this->strandEventPusher->sendEvent('reprogram', $program->content);
+    $this->strandEventPusher->sendEvent('launch', "{$ref}-{$revision}");
   }
 
   public function powerOff()

@@ -36,6 +36,18 @@ class ProgramStorageService
     return array_map([ Program::class, 'fromDatabaseRow' ], $programs);
   }
 
+  public function getLatestRevision(string $id)
+  {
+    $row = $this->db->selectOne(
+      'select "revision" from "programs" where "ref" = ? order by "revision" desc limit 1',
+      [ $id ]);
+    if ($row === null) {
+      throw new NotFoundException();
+    }
+
+    return intval($row['revision'], 10);
+  }
+
   public function getLatestProgram(string $id)
   {
     $row = $this->db->selectOne(
