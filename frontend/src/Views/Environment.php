@@ -7,7 +7,7 @@ use PN\Weblight\HTTP\Response;
 use const PN\Weblight\ROOT_PRIVATE;
 use function PN\Weblight\path_join;
 
-use Twig\Loader\Filesystem as FilesystemLoader;
+use Twig\Loader\FilesystemLoader;
 use Twig\Environment as TwigEnvironment;
 
 class Environment
