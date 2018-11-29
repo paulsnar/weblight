@@ -4,13 +4,13 @@ namespace PN\Weblight\Controllers;
 
 use PN\Weblight\Core\{AppContext, BaseController};
 use PN\Weblight\HTTP\{Request, Response};
+use PN\Weblight\Views\Environment;
 
 class IndexController extends BaseController
 {
   public function frontpage(AppContext $ctx, Request $rq)
   {
-    return new Response(Response::HTTP_OK, [
-      'Content-Type' => 'text/plain; charset=UTF-8',
-    ], "Hello, world!\n");
+    $env = $ctx->get(Environment::class);
+    return $env->renderResponse('index.html');
   }
 }
