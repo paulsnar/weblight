@@ -7,11 +7,11 @@ use PN\Weblight\HTTP\Response as HTTPResponse;
 
 class StrandService
 {
-  protected $ch, $programs;
+  protected $strandEventPusher, $programs;
 
-  public function __construct(CurlSession $ch, ProgramStorageService $ps)
+  public function __construct(StrandEventPusherService $sep, ProgramStorageService $ps)
   {
-    $this->ch = $ch;
+    $this->strandEventPusher = $sep;
     $this->programs = $ps;
   }
 
@@ -23,26 +23,11 @@ class StrandService
       $program = $this->programs->getProgram($ref, $revision);
     }
 
-    $rq = CurlRequest::post('http://127.0.14.1:8000/submit', json_encode([
-      'event' => 'reprogram',
-      'data' => $program->content,
-    ], \JSON_UNESCAPED_SLASHES));
-    $resp = $this->ch->perform($rq);
-
-    if ($resp->status !== HTTPResponse::HTTP_CREATED) {
-      throw new \Exception("Could not submit event: {$resp->body}");
-    }
+    $this->strandEventPusher->sendEvent('reprogram', $program->content);
   }
 
   public function powerOff()
   {
-    $rq = CurlRequest::post('http://127.0.14.1:8000/submit', json_encode([
-      'event' => 'off',
-    ], \JSON_UNESCAPED_SLASHES));
-    $resp = $this->ch->perform($rq);
-
-    if ($resp->status !== HTTPResponse::HTTP_CREATED) {
-      throw new \Exception("Could not submit event: {$resp->body}");
-    }
+    $this->strandEventPusher->sendEvent('off');
   }
 }

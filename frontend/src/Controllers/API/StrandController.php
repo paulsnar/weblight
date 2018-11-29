@@ -5,6 +5,7 @@ namespace PN\Weblight\Controllers\API;
 use PN\Weblight\API\{BaseAPIController, ErrorResponse, NotImplementedException};
 use PN\Weblight\Core\AppContext;
 use PN\Weblight\Curl\{Request as CurlRequest, Session as CurlSession};
+use PN\Weblight\Events\EventSubmissionError;
 use PN\Weblight\HTTP\{Request as HTTPRequest, Response as HTTPResponse};
 use PN\Weblight\Services\StrandService;
 
@@ -36,7 +37,7 @@ class StrandController extends BaseAPIController
     try {
       $this->strand->deployProgram($ref, $revision);
       return new HTTPResponse(HTTPResponse::HTTP_CREATED);
-    } catch (\Throwable $e) {
+    } catch (EventSubmissionError $e) {
       $ctx->log([ 'type' => 'event-failure', 'result' => $e->getMessage() ]);
       return new ErrorResponse(HTTPResponse::HTTP_INTERNAL_SERVER_ERROR, 'Internal error');
     }
@@ -47,7 +48,7 @@ class StrandController extends BaseAPIController
     try {
       $this->strand->powerOff();
       return new HTTPResponse(HTTPResponse::HTTP_ACCEPTED);
-    } catch (\Throwable $e) {
+    } catch (EventSubmissionError $e) {
       $ctx->log([ 'type' => 'event-failure', 'result' => $e->getMessage() ]);
       return new ErrorResponse(HTTPResponse::HTTP_INTERNAL_SERVER_ERROR, 'Internal error');
     }
