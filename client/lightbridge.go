@@ -38,10 +38,8 @@ func LaunchLightbridge(programPath string) (p *os.Process, err error) {
 
   go func() {
     // refresh last-modified timestamp
-    f, _ := os.OpenFile(programPath, os.O_RDWR, 0644)
-    if f != nil {
-      f.Close()
-    }
+    t := time.Now()
+    os.Chtimes(programPath, t, t)
   }()
 
   return
