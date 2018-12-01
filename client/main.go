@@ -40,8 +40,12 @@ func main() {
       if err := ExitLightbridge(p); err != nil {
         return err
       }
-      p = nil
     }
+    p, _ = LaunchLightbridge("/dev/null")
+    if p != nil {
+      p.Wait()
+    }
+    p = nil
 
     strandOn = false
     return nil
