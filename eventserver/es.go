@@ -104,7 +104,7 @@ func (es *EventSource) Loop() (error) {
           msg = append(msg, []byte("data\n")...)
         }
 
-        msg = append(msg, '\n', '\n')
+        msg = append(msg, '\n')
         if _, err := c.Write(msg); err != nil {
           return err
         }
