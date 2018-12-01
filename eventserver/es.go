@@ -13,7 +13,7 @@ type Event struct {
   ID    string `json:"id"`
   Event string `json:"event"`
   Data  string `json:"data"`
-  Retry *int
+  Retry int
 }
 
 type eventSourceConnection interface {
@@ -91,8 +91,8 @@ func (es *EventSource) Loop() (error) {
           id := strings.Replace(ev.ID, "\n", "\nid: ", -1)
           msg = append(msg, []byte("id: " + id + "\n")...)
         }
-        if ev.Retry != nil {
-          retry := strconv.FormatInt(int64(*ev.Retry), 10)
+        if ev.Retry != 0 {
+          retry := strconv.FormatInt(int64(ev.Retry), 10)
           msg = append(msg, []byte("retry: " + retry + "\n")...)
         }
         if ev.Data != "" {
