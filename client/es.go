@@ -35,26 +35,26 @@ type EventSource struct {
 type Event struct {
   ID, Event string
   Data []byte
-  Retry *int
+  Retry int
 }
 
 func esSplit(data []byte, atEOF bool) (advance int, token []byte, err error) {
   l := 2
-  brk := bytes.Index(data, []byte("\n\n"))
+  brk := bytes.Index(data, []byte("\r\n"))
   if brk == -1 {
-    l = 4
-    brk = bytes.Index(data, []byte("\r\n\r\n"))
+    l = 1
+    brk = bytes.Index(data, []byte("\n"))
   }
   if brk == -1 {
     // this is the oddest of all
-    l = 2
-    brk = bytes.Index(data, []byte("\r\r"))
+    l = 1
+    brk = bytes.Index(data, []byte("\r"))
   }
   if brk == -1 {
     return 0, nil, nil
   }
 
-  body := data[:brk + l]
+  body := data[:brk]
   return brk + l, body, nil
 }
 
@@ -90,28 +90,27 @@ func (es *EventSource) Close() {
 }
 
 func (es *EventSource) GetNextEvent() (*Event, error) {
-  if !es.sc.Scan() {
-    return nil, es.sc.Err()
-  }
+  // see: https://html.spec.whatwg.org/multipage/server-sent-events.html#event-stream-interpretation
+  // adapted for compatible semantics, if not implementation
 
-  msg := string(es.sc.Bytes())
-  lineEnding := msg[len(msg)-2:]
-  if lineEnding != "\r\n" {
-    lineEnding = lineEnding[1:]
-  }
+start:
 
-  ev := new(Event)
-  lines := strings.Split(msg, lineEnding)
+  e := new(Event)
+  sc := es.sc
 
-  for _, line := range lines {
-    if line == "" {
-      // last line
-      break
+  for {
+    if !sc.Scan() {
+      return nil, sc.Err()
     }
-    if line[0] == ':' {
-      // comment
+    line := sc.Text()
+    if line == "" {
+      break // dispatch event
+    }
+
+    if line[0] == ':' { // comment line
       continue
     }
+
     parts := strings.SplitN(line, ":", 2)
     if len(parts) == 1 {
       parts = append(parts, "")
@@ -121,36 +120,40 @@ func (es *EventSource) GetNextEvent() (*Event, error) {
 
     fieldName := parts[0]
     fieldValue := parts[1]
+
     switch fieldName {
       case "event":
-        ev.Event = fieldValue
+        e.Event = fieldValue
 
       case "data":
-        if ev.Data == nil {
-          ev.Data = []byte(fieldValue + "\n")
+        if e.Data == nil {
+          e.Data = []byte(fieldValue + "\n")
         } else {
-          ev.Data = append(ev.Data, []byte(fieldValue + "\n")...)
+          e.Data = append(e.Data, []byte(fieldValue + "\n")...)
         }
 
       case "id":
         if !strings.ContainsRune(fieldValue, 0) {
-          ev.ID = fieldValue
+          e.ID = fieldValue
         }
 
       case "retry":
         if i, err := strconv.ParseInt(fieldValue, 10, 64); err == nil {
-          _i := int(i)
-          ev.Retry = &_i
+          e.Retry = int(i)
         }
     }
   }
 
-  if ev.Event == "" {
-    ev.Event = "message"
+  if e.Data == nil {
+    goto start // get next event instead
+  }
+  e.Data = bytes.TrimSuffix(e.Data, []byte{'\n'})
+
+  if e.Event == "" {
+    e.Event = "message"
   }
 
-  ev.Data = bytes.TrimSuffix(ev.Data, []byte("\n"))
-  return ev, nil
+  return e, nil
 }
 
 func (es *EventSource) Loop() error {
