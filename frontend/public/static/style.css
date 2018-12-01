@@ -9,15 +9,18 @@ body {
   margin: 0;
 }
 
+.hidden { display: none; }
+
 .narrow-container {
-  width: 30rem;
+  width: 95vw;
+  max-width: 40rem;
   margin: 1rem auto 0 auto;
   padding: 1rem;
   background-color: #444;
   border-radius: 0.25rem;
 }
 
-.str-conn {
+.label {
   background-color: #444;
   color: #eee;
   border-radius: 0.25rem;
@@ -25,10 +28,35 @@ body {
   font-size: 90%;
   padding: 0.25em 0.5em;
 }
-.str-conn--connected { background-color: #494; }
-.str-conn--disconnected { background-color: #944; }
+.label--green { background-color: #494; }
+.label--red { background-color: #944; }
 
 .h-small {
   font-size: 62.5%;
   color: #bbb;
 }
+
+.row {
+  width: 100%;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  align-items: center;
+}
+.row-item--right {
+  justify-self: flex-end;
+}
+
+.button {
+  font-size: inherit;
+  padding: 0.375rem 0.75rem;
+
+  border-radius: 0.25rem;
+  border: none;
+  background-color: #606060;
+  color: inherit;
+}
+.button:hover { background-color: #696969; cursor: pointer; }
+
+.button--primary { background-color: #1976D2; }
+.button--primary:hover { background-color: #1E88E5; }

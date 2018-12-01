@@ -42,6 +42,19 @@ func NewEventSource(rw http.ResponseWriter, rq *http.Request) (*EventSource, err
   }, nil
 }
 
+func NewBufferedEventSource(rw http.ResponseWriter, rq *http.Request) (*EventSource, error) {
+  c, ok := rw.(eventSourceConnection)
+  if !ok {
+    return nil, ErrESIncompatibleConnection
+  }
+
+  return &EventSource{
+    Events: make(chan Event, 3),
+    c: c,
+    ctx: rq.Context(),
+  }, nil
+}
+
 func (es *EventSource) Loop() (error) {
   defer close(es.Events)
 
@@ -87,9 +100,11 @@ func (es *EventSource) Loop() (error) {
           data := strings.Replace(ev.Data, "\n", "\ndata: ", -1)
           msg = append(msg, []byte(data)...)
           msg = append(msg, '\n')
+        } else {
+          msg = append(msg, []byte("data\n")...)
         }
 
-        msg = append(msg, '\n')
+        msg = append(msg, '\n', '\n')
         if _, err := c.Write(msg); err != nil {
           return err
         }

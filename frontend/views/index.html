@@ -1,21 +1,65 @@
 {% extends "layouts/default.html" %}
 
-{% block body %}
+{% block styles %}
+{{ parent() }}
+<style>
+  .wlindex-header-icon {
+    display: inline-block;
+    height: 1em;
+    vertical-align: middle;
+  }
+  .wlindex-header-bulb-icon {
+    fill: #ddd;
+    stroke: #ddd;
+    stroke-width: 0.025rem;
+  }
+
+  .wlindex-header-connected-icon { fill: #4d4; }
+  .wlindex-header-disconnected-icon { fill: #d64; }
+</style>
+{% endblock %}
+
+{% block content %}
 <div class="narrow-container">
-  <h1 style="text-align: center">💡🌐 <br><span class="h-small">weblight</span></h1>
-  <p style="text-align: center">
-  {% if connected %}
-    <span class="str-conn str-conn--connected">lenta ir savienota</span>
-  {% else %}
-    <span class="str-conn str-conn--disconnected">nav savienojuma ar lentu</span>
-  {% endif %}
+  <div class="row">
+    <h1>
+      <svg xmlns="http://www.w3.org/2000/svg"
+        class="wlindex-header-icon wlindex-header-bulb-icon"
+        viewBox="-1 -1 14 18"><use href="#icon-lightbulb" /></svg>
+      weblight
+    </h1>
+    <span>
+      <span id="js-connlabel-connected"
+          {% if not connected -%} class="hidden" {%- endif %}>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 16"
+          class="wlindex-header-icon wlindex-header-connected-icon"
+          style="height: 1.375em;">
+          <use href="#icon-zap" />
+        </svg>
+        &nbsp;savienots
+      </span>
+      <span id="js-connlabel-disconnected"
+          {% if connected -%} class="hidden" {%- endif %}>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"
+          class="wlindex-header-icon wlindex-header-disconnected-icon"
+          style="height: 1.375em">
+          <use href="#icon-alert" />
+        </svg>
+        &nbsp;nav savienojuma
+      </span>
+    </span>
+  </div>
 
   <p>
-    <button class="button" id="js-deploy-last">palaist pēdējo programmu</button>
+    <button class="button button--primary" id="js-deploy-last">palaist pēdējo programmu</button>
     <button class="button" id="js-power-off">izslēgt lentu</button>
   </p>
 </div>
+{{ include('includes/icons.html') }}
+{% endblock %}
 
+{% block scripts %}
+{{ parent() }}
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     "use strict";
@@ -29,8 +73,7 @@
       e.preventDefault()
       if (_executing) { return }
 
-      var body = new FormData()
-      fetch('/api/1/strand/redeploy', { method: 'POST', body: body })
+      fetch('/api/1/strand/redeploy', { method: 'POST', credentials: 'same-origin' })
         .then(function() {
           _executing = false
         }, function(e) {
@@ -45,13 +88,26 @@
 
       _executing = true
 
-      fetch('/api/1/strand/poweroff', { method: 'POST' })
+      fetch('/api/1/strand/poweroff', { method: 'POST', credentials: 'same-origin' })
         .then(function() {
           _executing = false
         }, function(e) {
           _executing = false
           return Promise.reject(e)
         })
+    })
+
+    var $connDisconnected = document.getElementById('js-connlabel-disconnected'),
+        $connConnected = document.getElementById('js-connlabel-connected')
+
+    var connections = new EventSource('/api/1-realtime/strand/meta')
+    connections.addEventListener('connected', function() {
+      $connConnected.classList.remove('hidden')
+      $connDisconnected.classList.add('hidden')
+    })
+    connections.addEventListener('disconnected', function() {
+      $connDisconnected.classList.remove('hidden')
+      $connConnected.classList.add('hidden')
     })
   })
 </script>

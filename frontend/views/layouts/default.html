@@ -2,5 +2,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width">
 <title>{% block title %}weblight{% endblock %}</title>
-<link rel="stylesheet" href="/static/style.css">
-{% block body %}{% endblock %}
+{% block styles %}
+  <link rel="stylesheet" href="/static/style.css">
+{% endblock %}
+{% block content %}{% endblock %}
+{% block scripts %}{% endblock %}
