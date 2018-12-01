@@ -92,8 +92,6 @@ func handleMetaClient(w http.ResponseWriter, r *http.Request) {
     return
   }
 
-  w.Header().Set("Access-Control-Allow-Origin", "http://127.0.14.1:8001")
-
   defer func() {
     metaClientsM.Lock()
     defer metaClientsM.Unlock()
