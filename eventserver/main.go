@@ -11,25 +11,25 @@ import (
 
 var (
   clientM = new(sync.Mutex)
-  client *EventSource
+  client *eventSource
 
   metaClientsM = new(sync.Mutex)
-  metaClients []*EventSource
+  metaClients []*eventSource
 
-  ErrConflict = errors.New("conflict")
+  errConflict = errors.New("conflict")
 )
 
-func metaNotify(event, data string) {
+func metaNotify(eventType, data string) {
   metaClientsM.Lock()
   defer metaClientsM.Unlock()
 
   for _, client := range metaClients {
-    client.Events <- Event{Event: event, Data: data}
+    client.Events <- event{Event: eventType, Data: data}
   }
 }
 
 func handleClient(w http.ResponseWriter, r *http.Request) {
-  _client, err := func() (*EventSource, error) {
+  _client, err := func() (*eventSource, error) {
     clientM.Lock()
     defer clientM.Unlock()
 
@@ -37,10 +37,10 @@ func handleClient(w http.ResponseWriter, r *http.Request) {
       w.Header().Set("Content-Type", "text/plain; charset=UTF-8")
       w.WriteHeader(http.StatusConflict)
       w.Write([]byte("another event client is already connected\n"))
-      return nil, ErrConflict
+      return nil, errConflict
     }
 
-    _client, err := NewEventSource(w, r)
+    _client, err := newEventSource(w, r)
     if err != nil {
       fmt.Printf("event source creation: %s\n", err)
       w.Header().Set("Content-Type", "text/plain; charset=UTF-8")
@@ -72,8 +72,8 @@ func handleClient(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleMetaClient(w http.ResponseWriter, r *http.Request) {
-  _client, err := func() (*EventSource, error) {
-    _client, err := NewBufferedEventSource(w, r)
+  _client, err := func() (*eventSource, error) {
+    _client, err := newBufferedEventSource(w, r)
     if err != nil {
       fmt.Printf("event source creation: %s\n", err)
       w.Header().Set("Content-Type", "text/plain; charset=UTF-8")
@@ -123,7 +123,7 @@ func handleSubmission(w http.ResponseWriter, r *http.Request) {
   }
 
   dec := json.NewDecoder(r.Body)
-  var ev Event
+  var ev event
   if err := dec.Decode(&ev); err != nil {
     fmt.Printf("event decoding: %s\n", err)
     w.Header().Set("Content-Type", "text/plain; charset=UTF-8")

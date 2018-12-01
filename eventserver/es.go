@@ -9,7 +9,7 @@ import (
   "time"
 )
 
-type Event struct {
+type event struct {
   ID    string `json:"id"`
   Event string `json:"event"`
   Data  string `json:"data"`
@@ -21,41 +21,39 @@ type eventSourceConnection interface {
   http.Flusher
 }
 
-type EventSource struct {
-  Events chan Event
+type eventSource struct {
+  Events chan event
   c eventSourceConnection
   ctx context.Context
 }
 
-var ErrESIncompatibleConnection = errors.New("eventsource: incompatible connection")
+var errESIncompatibleConnection = errors.New("eventsource: incompatible connection")
 
-func NewEventSource(rw http.ResponseWriter, rq *http.Request) (*EventSource, error) {
+func newEventSource(rw http.ResponseWriter, rq *http.Request) (*eventSource, error) {
   c, ok := rw.(eventSourceConnection)
   if !ok {
-    return nil, ErrESIncompatibleConnection
+    return nil, errESIncompatibleConnection
   }
 
-  return &EventSource{
-    Events: make(chan Event),
+  return &eventSource{
+    Events: make(chan event),
     c: c,
     ctx: rq.Context(),
   }, nil
 }
 
-func NewBufferedEventSource(rw http.ResponseWriter, rq *http.Request) (*EventSource, error) {
-  c, ok := rw.(eventSourceConnection)
-  if !ok {
-    return nil, ErrESIncompatibleConnection
+func newBufferedEventSource(rw http.ResponseWriter, rq *http.Request) (*eventSource, error) {
+  es, err := newEventSource(rw, rq)
+  if err != nil {
+    return nil, err
   }
 
-  return &EventSource{
-    Events: make(chan Event, 3),
-    c: c,
-    ctx: rq.Context(),
-  }, nil
+  close(es.Events)
+  es.Events = make(chan event, 3)
+  return es, nil
 }
 
-func (es *EventSource) Loop() (error) {
+func (es *eventSource) Loop() (error) {
   defer close(es.Events)
 
   c := es.c
