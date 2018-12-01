@@ -1,0 +1,32 @@
+{% extends "layouts/default.html" %}
+
+{% block styles %}
+{{ parent() }}
+<style>
+  .wlproglist-item {
+    display: block;
+    font-family: monospace;
+    text-decoration: none;
+  }
+
+  .wlproglist-item--id {
+    color: #ddd;
+    font-weight: bold;
+  }
+  .wlproglist-item--revision {
+    color: #aaa;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="narrow-container">
+  <h1>pieejamās programmas</h1>
+  {% for program in programs %}
+    <a class="wlproglist-item" href="/programs/{{ program.ref }}">
+      <span class="wlproglist-item--id">{{ program.ref }}</span>
+      <span class="wlproglist-item--revision">rev {{ program.revision }}</span>
+    </a>
+  {% endfor %}
+</div>
+{% endblock %}

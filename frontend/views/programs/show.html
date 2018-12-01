@@ -1,0 +1,35 @@
+{% extends 'layouts/default.html' %}
+
+{% block content %}
+<div class="narrow-container">
+  <h1>{{ program.ref }} <small>rev {{ program.revision }}</small></h1>
+  <div>
+    <button type="submit" class="button button--primary" id="js-btn-deploy">
+      nosūtīt uz lentu
+    </button>
+    {% if program.revision > 1 %}
+      <a class="a-inherited" href="/programs/{{ program.ref }}?revision={{ program.revision - 1 }}">
+        <button class="button">iepriekšējā versija</button>
+      </a>
+    {% endif %}
+  </div>
+  <pre>{{ program.content }}</pre>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    "use strict";
+
+    var $deploy = document.getElementById('js-btn-deploy')
+
+    $deploy.addEventListener('click', function() {
+      var bd = new FormData()
+      bd.append('id', "{{ program.ref | e('js') }}")
+      bd.append('revision', "{{ program.revision | e('js') }}")
+      fetch('/api/1/strand/deploy', { method: 'POST', body: bd, credentials: 'same-origin' })
+    })
+  })
+</script>
+{% endblock %}
