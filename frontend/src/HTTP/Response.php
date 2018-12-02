@@ -97,6 +97,11 @@ class Response
     foreach ($this->headers as $key => $value) {
       header("{$key}: {$value}");
     }
+    if ( ! isset($this->headers['Content-Type'])) {
+      // prevent the dumb PHP default
+      header('Content-Type:');
+      header_remove('Content-Type');
+    }
 
     if ($this->body !== null) {
       if (is_resource($this->body)) {
