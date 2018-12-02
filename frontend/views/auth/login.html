@@ -1,0 +1,17 @@
+{% extends 'layouts/default.html' %}
+
+{% block content %}
+<div class="narrow-container">
+  <h1>ielogoties</h1>
+  {% if error %}
+    <div class="error">{{ error }}</div>
+  {% endif %}
+  <form method="POST"
+    {% if then %} action="/auth/login?then={{ then | e }}" {% else %}
+      action="/auth/login" {% endif %}>
+    <input type="text" name="username" {% if username %} value="{{ username | e }}" {% endif %}>
+    <input type="password" name="password">
+    <button type="submit">aiziet</button>
+  </form>
+</div>
+{% endblock %}

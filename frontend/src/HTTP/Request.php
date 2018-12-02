@@ -6,7 +6,16 @@ use PN\Weblight\Utilities\ImmutableBag;
 
 class Request
 {
-  public $method, $path, $headers, $query, $body, $form, $files, $cookies, $arguments = [ ];
+  /** @var string */
+  public $method, $path, $body;
+  /** @var Bag */
+  public $headers, $query, $form, $files, $cookies;
+  /** @var array */
+  public $arguments = [ ], $properties = [ ];
+  /** @var Authentication|null */
+  public $authentication;
+  /** @var Session */
+  public $session;
 
   public static function fromGlobals()
   {
@@ -35,6 +44,12 @@ class Request
     $rq->form = new ImmutableBag($_POST);
     $rq->files = new ImmutableBag($_FILES);
     $rq->cookies = new ImmutableBag($_COOKIE);
+
+    $rq->session = new Session();
+
+    if (array_key_exists('PHP_AUTH_USER', $_SERVER)) {
+      $rq->authentication = Authentication::fromGlobals();
+    }
 
     return $rq;
   }

@@ -2,10 +2,9 @@
 
 namespace PN\Weblight\Core;
 
-use PN\Weblight\Core\AppContext;
 use PN\Weblight\HTTP\{Request, Response};
 
-class BaseController
+class BaseController implements ControllerInterface
 {
   public function invoke(AppContext $ctx, string $method, Request $request): Response
   {

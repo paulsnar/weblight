@@ -120,4 +120,23 @@ HTML;
       'Location' => $targetPath,
     ], $msg);
   }
+
+  public static function redirectModal(Request $rq, string $modal): self
+  {
+    $rq->session['http.redirect'] = $rq->path;
+    return static::redirectTo($modal);
+  }
+
+  public static function redirectIntended(Request $rq, string $fallback): self
+  {
+    if (isset($rq->session['http.redirect'])) {
+      $target = $rq->session['http.redirect'];
+      unset($rq->session['http.redirect']);
+    } else if (isset($rq->query['then'])) {
+      $target = $rq->query['then'];
+    } else {
+      $target = $fallback;
+    }
+    return static::redirectTo($target);
+  }
 }

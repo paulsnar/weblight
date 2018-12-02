@@ -7,7 +7,7 @@ use PN\Weblight\Core\Routing\{Route, ControllerHandler, StaticServeHandler};
 use PN\Weblight\Curl\{Request as CurlRequest, Session as CurlSession};
 use PN\Weblight\Debugging\ErrorResponse as DebugErrorResponse;
 use PN\Weblight\HTTP\{DefaultResponses, HTTPSerializable, Request};
-use PN\Weblight\Controllers\{IndexController, ProgramController};
+use PN\Weblight\Controllers\{AuthController, IndexController, ProgramController};
 use PN\Weblight\Controllers\API\{ProgramController as APIProgramController,
   StrandController as APIStrandController};
 use const PN\Weblight\ROOT_PUBLIC;
@@ -25,7 +25,13 @@ class Application
     $this->ctx = new AppContext($this->dc);
 
     $this->routing = new Router($this->config, [
-      new Route('GET', '/', new ControllerHandler(IndexController::class, 'frontpage')),
+      new Route('GET', '/',
+        new ControllerHandler(IndexController::class, 'frontpage')),
+
+      new Route(['GET', 'POST'], '/auth/login',
+        new ControllerHandler(AuthController::class, 'login')),
+      new Route('POST', '/auth/logout',
+        new ControllerHandler(AuthController::class, 'logout')),
 
       new Route('GET', '/programs',
         new ControllerHandler(ProgramController::class, 'listPrograms')),
