@@ -39,6 +39,10 @@ class Application
         new ControllerHandler(AuthController::class, 'login')),
       new Route(['GET', 'POST'], '/auth/logout',
         new ControllerHandler(AuthController::class, 'logout')),
+      new Route('GET', '/auth/change-password',
+        new ControllerHandler(AuthController::class, 'showPasswordChangeScreen')),
+      new Route('POST', '/auth/change-password',
+        new ControllerHandler(AuthController::class, 'changePassword')),
 
       new Route('GET', '/programs',
         new ControllerHandler(ProgramController::class, 'listPrograms')),

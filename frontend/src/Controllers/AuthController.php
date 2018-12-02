@@ -5,7 +5,8 @@ namespace PN\Weblight\Controllers;
 use PN\Weblight\Auth\AuthenticationAttemptFailure;
 use PN\Weblight\Core\{AppContext, BaseController};
 use PN\Weblight\HTTP\{Request, Response};
-use PN\Weblight\Services\AuthService;
+use PN\Weblight\Middleware\EnsureACLLevel;
+use PN\Weblight\Services\{AuthService, UserStorageService};
 use PN\Weblight\Views\Environment;
 
 class AuthController extends BaseController
@@ -13,12 +14,19 @@ class AuthController extends BaseController
   /** @var AuthService */
   protected $auth;
 
+  /** @var UserStorageService */
+  protected $users;
+
   /** @var Environment */
   protected $views;
 
-  public function __construct(AuthService $auth, Environment $env)
-  {
+  public function __construct(
+    AuthService $auth,
+    UserStorageService $uss,
+    Environment $env
+  ) {
     $this->auth = $auth;
+    $this->users = $uss;
     $this->views = $env;
   }
 
@@ -88,5 +96,36 @@ class AuthController extends BaseController
 
     $this->auth->logOut($rq);
     return Response::redirectIntended($rq, '/');
+  }
+
+  public function showPasswordChangeScreen(Request $rq): Response
+  {
+    $this->requireMiddleware($rq, EnsureACLLevel::class);
+    return $this->views->renderResponse('auth/changepw.html');
+  }
+
+  public function changePassword(Request $rq): Response
+  {
+    $this->requireMiddleware($rq, EnsureACLLevel::class);
+
+    $user = $this->auth->readAuthentication($rq);
+
+    if ($rq->form['new-password-1'] !== $rq->form['new-password-2']) {
+      return $this->views->renderResponse('auth/changepw.html', [
+        'error' => 'Jaunās paroles nesakrīt.',
+      ]);
+    }
+
+    $pw = $rq->form['password'];
+    if ( ! $user->checkPassword($pw)) {
+      return $this->views->renderResponse('auth/changepw.html', [
+        'error' => 'Pašreizējā parole nebija pareiza.',
+      ]);
+    }
+
+    $user->setHash($rq->form['new-password-1']);
+    $this->users->update($user);
+
+    return Response::redirectTo('/');
   }
 }

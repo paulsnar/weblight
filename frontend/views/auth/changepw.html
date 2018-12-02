@@ -1,0 +1,27 @@
+{% extends 'layouts/default.html' %}
+
+{% block content %}
+<div class="narrow-container">
+  <h1>paroles maiņa</h1>
+  {% if error %}
+    <div class="error">{{ error }}</div>
+  {% endif %}
+  <form action="/auth/change-password" method="POST">
+    <label class="form-label">
+      pašreizējā parole:&nbsp;
+      <input class="form-field" type="password" name="password">
+    </label>
+    <label class="form-label">
+      jaunā parole:&nbsp;
+      <input class="form-field" type="password" name="new-password-1">
+    </label>
+    <label class="form-label">
+      jaunā parole atkārtoti:&nbsp;
+      <input class="form-field" type="password" name="new-password-2">
+    </label>
+    <button class="button button--primary" type="submit">
+      veikt nomaiņu
+    </button>
+  </form>
+</div>
+{% endblock %}

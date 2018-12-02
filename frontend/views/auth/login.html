@@ -9,8 +9,15 @@
   <form method="POST"
     {% if then %} action="/auth/login?then={{ then | e }}" {% else %}
       action="/auth/login" {% endif %}>
-    <input type="text" name="username" {% if username %} value="{{ username | e }}" {% endif %}>
-    <input type="password" name="password">
+    <label class="form-label">
+      lietotājvārds:&nbsp;
+      <input class="form-field" type="text" name="username"
+        {% if username %} value="{{ username | e }}" {% endif %}>
+    </label>
+    <label class="form-label">
+      parole:&nbsp;
+      <input class="form-field" type="password" name="password">
+    </label>
     <button type="submit">aiziet</button>
   </form>
 </div>

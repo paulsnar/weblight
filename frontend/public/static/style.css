@@ -52,6 +52,27 @@ a.a-inherited {
   text-decoration: none;
 }
 
+.error {
+  padding: 0.875rem;
+  background-color: #733;
+  /* border: 1px solid #611; */
+  color: #e88;
+  border-radius: 0.25rem;
+}
+
+.form-label {
+  width: 100%;
+  margin: 0.75rem 0;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+}
+
+.form-field {
+  font-size: inherit;
+  flex-grow: 1;
+}
+
 .button {
   display: inline-block;
   font-size: inherit;

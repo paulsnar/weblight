@@ -45,7 +45,9 @@ class UserStorageService
         '"is_programmer" = ?, "is_controller" = ?, "is_supereditor" = ? ' .
         'where "id" = ?',
       [ $user->username, $user->passwordHash,
-        $user->acl->isProgrammer, $user->acl->isController,
-          $user->acl->isSupereditor, $user->id ]);
+        (int) $user->acl->isProgrammer(),
+        (int) $user->acl->isController(),
+        (int) $user->acl->isSupereditor(),
+        $user->id ]);
   }
 }
