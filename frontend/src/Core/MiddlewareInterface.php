@@ -6,5 +6,5 @@ use PN\Weblight\HTTP\{Request, Response};
 
 interface MiddlewareInterface
 {
-  public function invoke(Request $rq): ?Response;
+  public function invoke(Request $rq, ...$arguments): ?Response;
 }

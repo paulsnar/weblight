@@ -15,10 +15,10 @@ class BaseController implements ControllerInterface
     }
   }
 
-  protected function requireMiddleware(Request $request, string $name)
+  protected function requireMiddleware(Request $request, string $name, ...$args)
   {
     $instance = $request->ctx->get($name);
-    $resp = $instance->invoke($request);
+    $resp = $instance->invoke($request, ...$args);
     if ($resp !== null) {
       throw new MiddlewareInterrupt($resp);
     }
