@@ -5,6 +5,7 @@ namespace PN\Weblight\Controllers;
 use PN\Weblight\Core\{AppContext, BaseController};
 use PN\Weblight\Errors\NotFoundException;
 use PN\Weblight\HTTP\{Request, Response};
+use PN\Weblight\Middleware\EnsureAuthenticated;
 use PN\Weblight\Services\ProgramStorageService;
 use PN\Weblight\Views\Environment;
 
@@ -24,6 +25,8 @@ class ProgramController extends BaseController
 
   public function listPrograms(AppContext $ctx, Request $rq): Response
   {
+    $this->requireMiddleware($rq, EnsureAuthenticated::class);
+
     $programs = $this->programs->getProgramStubList();
     return $this->views->renderResponse('programs/list.html', [
       'programs' => $programs,
