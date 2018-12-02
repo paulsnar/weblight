@@ -37,7 +37,7 @@ class Application
 
       new Route(['GET', 'POST'], '/auth/login',
         new ControllerHandler(AuthController::class, 'login')),
-      new Route('POST', '/auth/logout',
+      new Route(['GET', 'POST'], '/auth/logout',
         new ControllerHandler(AuthController::class, 'logout')),
 
       new Route('GET', '/programs',
