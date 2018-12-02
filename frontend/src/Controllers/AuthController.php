@@ -24,7 +24,7 @@ class AuthController extends BaseController
 
   public function login(Request $rq): Response
   {
-    if ($this->auth->isAuthenticated($rq)) {
+    if ($this->auth->readAuthentication($rq) !== null) {
       return Response::redirectIntended($rq, '/');
     }
 
@@ -82,7 +82,7 @@ class AuthController extends BaseController
 
   public function logout(Request $rq): Response
   {
-    if ( ! $this->auth->isAuthenticated($rq)) {
+    if ($this->auth->readAuthentication($rq) === null) {
       return Response::redirectIntended($rq, '/');
     }
 

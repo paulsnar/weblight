@@ -16,22 +16,22 @@ class AuthService
     $this->users = $uss;
   }
 
-  public function isAuthenticated(Request $rq): bool
+  public function readAuthentication(Request $rq): ?User
   {
     $id = $rq->session['auth.user_id'] ?? null;
     if ($id === null) {
-      return false;
+      return null;
     }
 
     try {
       $user = $this->users->fetchUser($id);
     } catch (NotFoundException $e) {
       unset($rq->session['auth.user_id']);
-      return false;
+      return null;
     }
 
     $rq->properties['auth.user'] = $user;
-    return true;
+    return $user;
   }
 
   public function tryAuthentication(Request $rq, string $username, string $password): User
