@@ -2,7 +2,8 @@
 
 namespace PN\Weblight;
 
-use PN\Weblight\Core\{AppContext, Configuration, DependencyContainer, Router};
+use PN\Weblight\Core\{AppContext, Configuration, ContextfulRequest,
+  DependencyContainer, Router};
 use PN\Weblight\Core\Routing\{Route, ControllerHandler, StaticServeHandler};
 use PN\Weblight\Curl\{Request as CurlRequest, Session as CurlSession};
 use PN\Weblight\Debugging\ErrorResponse as DebugErrorResponse;
@@ -15,14 +16,19 @@ use function PN\Weblight\path_join;
 
 class Application
 {
-  public $config, $dc, $ctx;
+  /** @var Configuration */
+  public $config;
+
+  /** @var DependencyContainer */
+  public $dc;
+
+  /** @var Router */
+  protected $routing;
 
   public function __construct()
   {
     $this->dc = new DependencyContainer();
     $this->config = $this->dc->get(Configuration::class);
-
-    $this->ctx = new AppContext($this->dc);
 
     $this->routing = new Router($this->config, [
       new Route('GET', '/',
@@ -70,14 +76,10 @@ class Application
     $response = null;
 
     try {
-      $request = Request::fromGlobals();
-      [ $context, $method ] = $this->routing->dispatch($request);
-      if (is_string($context)) {
-        $controller = $this->dc->get($context);
-        $response = $controller->invoke($this->ctx, $method, $request);
-      } else {
-        $response = $method($request);
-      }
+      $request = ContextfulRequest::fromGlobals($this->dc);
+      $request->ctx = new AppContext($this->dc);
+      $handler = $this->routing->dispatch($request);
+      $response = $handler->handle($request);
     } catch (HTTPSerializable $e) {
       $response = $e->httpSerialize($request);
     } catch (\Throwable $e) {

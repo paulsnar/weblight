@@ -23,7 +23,7 @@ class ProgramController extends BaseController
     $this->views = $env;
   }
 
-  public function listPrograms(AppContext $ctx, Request $rq): Response
+  public function listPrograms(Request $rq): Response
   {
     $this->requireMiddleware($rq, EnsureAuthenticated::class);
 
@@ -33,7 +33,7 @@ class ProgramController extends BaseController
     ]);
   }
 
-  public function showProgram(AppContext $ctx, Request $rq): Response
+  public function showProgram(Request $rq): Response
   {
     $ref = $rq->arguments['program'];
     if (isset($rq->query['revision']) && ctype_digit($rq->query['revision'])) {

@@ -17,7 +17,7 @@ class EnsureAuthenticated implements MiddlewareInterface
     $this->auth = $auth;
   }
 
-  public function invoke(AppContext $ctx, Request $rq): ?Response
+  public function invoke(Request $rq): ?Response
   {
     if ( ! $this->auth->isAuthenticated($rq)) {
       return Response::redirectModal($rq, '/auth/login');

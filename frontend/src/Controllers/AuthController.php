@@ -22,7 +22,7 @@ class AuthController extends BaseController
     $this->views = $env;
   }
 
-  public function login(AppContext $ctx, Request $rq): Response
+  public function login(Request $rq): Response
   {
     if ($this->auth->isAuthenticated($rq)) {
       return Response::redirectIntended($rq, '/');
@@ -80,7 +80,7 @@ class AuthController extends BaseController
     return Response::redirectIntended($rq, '/');
   }
 
-  public function logout(AppContext $ctx, Request $rq): Response
+  public function logout(Request $rq): Response
   {
     if ( ! $this->auth->isAuthenticated($rq)) {
       return Response::redirectIntended($rq, '/');

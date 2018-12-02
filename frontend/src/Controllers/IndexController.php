@@ -27,7 +27,7 @@ class IndexController extends BaseController
     $this->views = $env;
   }
 
-  public function frontpage(AppContext $ctx, Request $rq): Response
+  public function frontpage(Request $rq): Response
   {
     $this->requireMiddleware($rq, EnsureAuthenticated::class);
 

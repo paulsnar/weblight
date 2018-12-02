@@ -9,22 +9,14 @@ class AppContext
   /** @var DependencyContainer */
   protected $dc;
 
-  /** @var LogRouter */
-  protected $logger;
-
   public function __construct(DependencyContainer $dc)
   {
     $this->dc = $dc;
-    $this->logger = $dc->get(LogRouter::class);
   }
 
+  /** @return object */
   public function get(string $what)
   {
     return $this->dc->get($what);
-  }
-
-  public function log(array $config)
-  {
-    $this->logger->dispatch($config);
   }
 }

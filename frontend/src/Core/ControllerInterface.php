@@ -6,5 +6,5 @@ use PN\Weblight\HTTP\{Request, Response};
 
 interface ControllerInterface
 {
-  public function invoke(AppContext $ctx, string $method, Request $rq): Response;
+  public function invoke(string $method, Request $rq): Response;
 }

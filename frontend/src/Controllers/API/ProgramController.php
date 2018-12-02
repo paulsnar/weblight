@@ -18,20 +18,20 @@ class ProgramController extends BaseAPIController
     $this->programs = $ps;
   }
 
-  public function getProgramList(AppContext $ctx, Request $rq): Response
+  public function getProgramList(Request $rq): Response
   {
     $programs = $this->programs->getProgramStubList();
     return new Response($programs);
   }
 
-  public function createProgram(AppContext $ctx, Request $rq): Response
+  public function createProgram(Request $rq): Response
   {
     $program = $this->programs->createProgram($rq->body);
     unset($program->content);
     return new Response($program);
   }
 
-  public function getProgram(AppContext $ctx, Request $rq): Response
+  public function getProgram(Request $rq): Response
   {
     $revision = $rq->query['revision'] ?? 'latest';
 
@@ -55,7 +55,7 @@ class ProgramController extends BaseAPIController
     ], $program->content);
   }
 
-  public function updateProgram(AppContext $ctx, Request $rq): Response
+  public function updateProgram(Request $rq): Response
   {
     $revision = $rq->query['revision'];
     if ($revision === null) {
@@ -81,7 +81,7 @@ class ProgramController extends BaseAPIController
     return new Response($program);
   }
 
-  public function deleteProgram(AppContext $ctx, Request $rq): Response
+  public function deleteProgram(Request $rq): Response
   {
     // TODO???
     throw new NotImplementedException();

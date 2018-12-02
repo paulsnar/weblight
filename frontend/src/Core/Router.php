@@ -5,7 +5,7 @@ namespace PN\Weblight\Core;
 use FastRoute\{Dispatcher as FRDispatcher, RouteCollector};
 use function FastRoute\simpleDispatcher;
 
-use PN\Weblight\Core\Routing\{ControllerHandler, StaticServeHandler};
+use PN\Weblight\Core\Routing\{CallableHandler, HandlerInterface};
 use PN\Weblight\HTTP\{Request, DefaultResponses};
 use function PN\Weblight\str_starts_with;
 
@@ -28,7 +28,10 @@ class Router
     });
   }
 
-  public function dispatch(Request $rq)
+  /**
+   * @throws \Exception
+   */
+  public function dispatch(Request $rq): HandlerInterface
   {
     if (str_starts_with($this->config['prefix'], $rq->path)) {
       $rq->path = substr($rq->path, strlen($this->config['prefix']));
@@ -39,14 +42,10 @@ class Router
     $status = $result[0];
     switch ($status) {
       case FRDispatcher::NOT_FOUND:
-        return [ null, function (Request $rq) {
-          return DefaultResponses::notFound();
-        } ];
+        return new CallableHandler([ DefaultResponses::class, 'notFound' ]);
 
       case FRDispatcher::METHOD_NOT_ALLOWED:
-        return [ null, function (Request $rq) {
-          return DefaultResponses::methodNotAllowed();
-        } ];
+        return new CallableHandler([ DefaultResponses::class, 'methodNotAllowed' ]);
 
       case FRDispatcher::FOUND:
         break;
@@ -58,16 +57,9 @@ class Router
     $rq->arguments = $result[2];
     $handler = $result[1];
 
-    if ($handler instanceof ControllerHandler) {
-      return [ $handler->controller, $handler->method ];
-    } else if ($handler instanceof StaticServeHandler) {
-      return [ null, [ $handler, 'handle' ] ];
+    if (is_callable($handler)) {
+      $handler = new CallableHandler($handler);
     }
-
-    if ( ! is_callable($handler)) {
-      throw new \Exception("Routing failed: unknown handler class installed");
-    }
-
-    return [ null, $handler ];
+    return $handler;
   }
 }

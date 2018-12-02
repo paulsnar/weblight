@@ -2,6 +2,9 @@
 
 namespace PN\Weblight\Core\Routing;
 
+use PN\Weblight\Core\ContextfulRequest;
+use PN\Weblight\HTTP\{Request, Response};
+
 class ControllerHandler implements HandlerInterface
 {
   /** @var string */
@@ -15,11 +18,11 @@ class ControllerHandler implements HandlerInterface
 
   public function handle(Request $rq): Response
   {
-    if ( ! ($rq instanceof HandlerInterface)) {
+    if ( ! ($rq instanceof ContextfulRequest)) {
       throw new \Exception('Controller invocation with non-contextful request');
     }
 
     $ctrl = $rq->ctx->get($this->controller);
-    return $ctrl->invoke($rq->ctx, $this->method, $rq);
+    return $ctrl->invoke($this->method, $rq);
   }
 }
