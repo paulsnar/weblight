@@ -2,7 +2,8 @@
 
 namespace PN\Weblight\Controllers\API;
 
-use PN\Weblight\API\{BaseAPIController, ErrorResponse, NotImplementedException, Response};
+use PN\Weblight\API\{BaseAPIController, ErrorResponse, NotImplementedException,
+  Response as APIResponse};
 use PN\Weblight\Core\AppContext;
 use PN\Weblight\Data\Models\Program;
 use PN\Weblight\Errors\SentinelMismatchException;
@@ -11,6 +12,7 @@ use PN\Weblight\Services\ProgramStorageService;
 
 class ProgramController extends BaseAPIController
 {
+  /** @var ProgramStorageService */
   protected $programs;
 
   public function __construct(ProgramStorageService $ps)
@@ -21,14 +23,14 @@ class ProgramController extends BaseAPIController
   public function getProgramList(Request $rq): Response
   {
     $programs = $this->programs->getProgramStubList();
-    return new Response($programs);
+    return new APIResponse($programs);
   }
 
   public function createProgram(Request $rq): Response
   {
     $program = $this->programs->createProgram($rq->body);
     unset($program->content);
-    return new Response($program);
+    return new APIResponse($program);
   }
 
   public function getProgram(Request $rq): Response
@@ -40,7 +42,7 @@ class ProgramController extends BaseAPIController
       $program = $this->programs->getLatestProgram($rq->arguments['program']);
     } else {
       if ( ! ctype_digit($revision)) {
-        return new ErrorResponse(HTTPResponse::HTTP_BAD_REQUEST,
+        return new ErrorResponse(Response::HTTP_BAD_REQUEST,
           'Malformed revision number');
       }
 
@@ -49,7 +51,7 @@ class ProgramController extends BaseAPIController
         $rq->arguments['program'], $revision);
     }
 
-    return new HTTPResponse(HTTPResponse::HTTP_OK, [
+    return new Response(Response::HTTP_OK, [
       'Content-Type' => 'text/x-lua; charset=UTF-8',
       'WL-Revision' => $program->revision,
     ], $program->content);
@@ -59,10 +61,10 @@ class ProgramController extends BaseAPIController
   {
     $revision = $rq->query['revision'];
     if ($revision === null) {
-      return new ErrorResponse(HTTPResponse::HTTP_BAD_REQUEST,
+      return new ErrorResponse(Response::HTTP_BAD_REQUEST,
         'Last revision number must be provided');
     } else if ( ! ctype_digit($revision)) {
-      return new ErrorResponse(HTTPResponse::HTTP_BAD_REQUEST,
+      return new ErrorResponse(Response::HTTP_BAD_REQUEST,
         'Malformed revision number');
     }
 
@@ -73,12 +75,12 @@ class ProgramController extends BaseAPIController
     try {
       $this->programs->insertNewRevision($program, $rq->body);
     } catch (SentinelMismatchException $e) {
-      return new ErrorResponse(HTTPResponse::HTTP_CONFLICT,
+      return new ErrorResponse(Response::HTTP_CONFLICT,
         'Revision number mismatch');
     }
 
     unset($program->content);
-    return new Response($program);
+    return new APIResponse($program);
   }
 
   public function deleteProgram(Request $rq): Response
