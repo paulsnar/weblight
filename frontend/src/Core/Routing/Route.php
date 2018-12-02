@@ -4,9 +4,16 @@ namespace PN\Weblight\Core\Routing;
 
 class Route
 {
-  public $method, $path, $handler;
+  /** @var string|string[] */
+  public $method;
 
-  public function __construct(string $method, string $path, $handler)
+  /** @var string */
+  public $path;
+
+  /** @var ControllerHandler|StaticServeHandler|callable */
+  public $handler;
+
+  public function __construct($method, string $path, $handler)
   {
     $this->method = $method;
     $this->path = $path;
