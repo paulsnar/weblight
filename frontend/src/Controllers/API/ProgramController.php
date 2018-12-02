@@ -6,7 +6,7 @@ use PN\Weblight\API\{BaseAPIController, ErrorResponse, NotImplementedException, 
 use PN\Weblight\Core\AppContext;
 use PN\Weblight\Data\Models\Program;
 use PN\Weblight\Errors\SentinelMismatchException;
-use PN\Weblight\HTTP\{Request, Response as HTTPResponse};
+use PN\Weblight\HTTP\{Request, Response};
 use PN\Weblight\Services\ProgramStorageService;
 
 class ProgramController extends BaseAPIController
