@@ -2,6 +2,7 @@
 
 namespace PN\Weblight\Services;
 
+use PN\Weblight\Auth\User;
 use PN\Weblight\Data\{Database, DatabaseException};
 use PN\Weblight\Data\Models\Program;
 use PN\Weblight\Errors\{ConflictException, NotFoundException, SentinelMismatchException};
@@ -74,7 +75,7 @@ class ProgramStorageService
     return Program::fromDatabaseRow($row);
   }
 
-  public function createProgram(string $content): Program
+  public function createProgram(User $author, string $content): Program
   {
     return $this->db->transaction(function () use ($content) {
       $program = new Program();
@@ -94,8 +95,9 @@ class ProgramStorageService
       $program->content = $content;
 
       $this->db->query(
-        'insert into "programs" ("ref", "revision", "content") values (?, ?, ?)',
-        [ $id, 1, $content ]);
+        'insert into "programs" ("ref", "revision", "author_id", "content") ' .
+          'values (?, ?, ?, ?)',
+        [ $id, 1, $author->id, $content ]);
       $program->id = $this->db->lastInsertId();
 
       return $program;
@@ -119,8 +121,9 @@ class ProgramStorageService
       $program->revision += 1;
 
       $this->db->query(
-        'insert into "programs" ("ref", "revision", "content") values (?, ?, ?)',
-        [ $program->ref, $program->revision, $newContent ]);
+        'insert into "programs" ("ref", "revision", "author_id", "content") ' .
+          'values (?, ?, ?, ?)',
+        [ $program->ref, $program->revision, $program->authorId, $newContent ]);
       $program->id = $this->db->lastInsertId();
 
       return $program;

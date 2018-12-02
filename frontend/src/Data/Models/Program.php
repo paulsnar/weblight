@@ -7,7 +7,8 @@ use PN\Weblight\Data\BaseModel;
 class Program extends BaseModel implements \JsonSerializable
 {
   /** @var int */
-  public $id, $revision;
+  public $id, $revision, $authorId;
+
   /** @var string */
   public $ref, $content;
 
