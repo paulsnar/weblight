@@ -51,8 +51,13 @@
   </div>
 
   <p>
+    {% if can_control %}
     <button class="button button--primary" id="js-deploy-last">palaist pēdējo programmu</button>
     <button class="button" id="js-power-off">izslēgt lentu</button>
+    {% else %}
+    <button class="button button--primary button--disabled">palaist pēdējo programmu</button>
+    <button class="button button--disabled">izslēgt lentu</button>
+    {% endif %}
     <a class="a-inherited" href="/programs"><button class="button">programmu saraksts</button></a>
   </p>
 </div>
@@ -65,6 +70,7 @@
   document.addEventListener('DOMContentLoaded', function() {
     "use strict";
 
+    {% if can_control %}
     var $deployLast = document.getElementById('js-deploy-last'),
         $powerOff = document.getElementById('js-power-off')
 
@@ -97,6 +103,7 @@
           return Promise.reject(e)
         })
     })
+    {% endif %}
 
     var $connDisconnected = document.getElementById('js-connlabel-disconnected'),
         $connConnected = document.getElementById('js-connlabel-connected')

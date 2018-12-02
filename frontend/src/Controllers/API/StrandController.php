@@ -3,9 +3,11 @@
 namespace PN\Weblight\Controllers\API;
 
 use PN\Weblight\API\{BaseAPIController, ErrorResponse, NotImplementedException};
+use PN\Weblight\Auth\AccessControlList;
 use PN\Weblight\Core\AppContext;
 use PN\Weblight\Events\EventSubmissionError;
 use PN\Weblight\Logging\LogRouter;
+use PN\Weblight\Middleware\API\EnsureACLLevel;
 use PN\Weblight\HTTP\{Request, Response};
 use PN\Weblight\Services\StrandService;
 
@@ -25,6 +27,9 @@ class StrandController extends BaseAPIController
 
   public function deployProgram(Request $rq): Response
   {
+    $this->requireMiddleware($rq, EnsureACLLevel::class,
+      AccessControlList::IS_CONTROLLER);
+
     $ref = $rq->form['id'] ?? null;
     if ($ref === null) {
       return new ErrorResponse(Response::HTTP_BAD_REQUEST, 'No program specified');
@@ -50,6 +55,9 @@ class StrandController extends BaseAPIController
 
   public function redeployPreviousProgram(Request $rq): Response
   {
+    $this->requireMiddleware($rq, EnsureACLLevel::class,
+      AccessControlList::IS_CONTROLLER);
+
     try {
       $this->strand->redeployLastProgram();
       return new Response(Response::HTTP_ACCEPTED);
@@ -62,6 +70,9 @@ class StrandController extends BaseAPIController
 
   public function powerOff(Request $rq): Response
   {
+    $this->requireMiddleware($rq, EnsureACLLevel::class,
+      AccessControlList::IS_CONTROLLER);
+
     try {
       $this->strand->powerOff();
       return new Response(Response::HTTP_ACCEPTED);

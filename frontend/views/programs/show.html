@@ -4,7 +4,11 @@
 <div class="narrow-container">
   <h1>{{ program.ref }} <small>rev {{ program.revision }}</small></h1>
   <div>
-    <button type="submit" class="button button--primary" id="js-btn-deploy">
+    {% if can_deploy %}
+    <button class="button button--primary" id="js-btn-deploy">
+    {% else %}
+    <button class="button button--primary button--disabled">
+    {% endif %}
       nosūtīt uz lentu
     </button>
     {% if program.revision > 1 %}
@@ -18,6 +22,8 @@
 {% endblock %}
 
 {% block scripts %}
+{{ parent() }}
+{% if can_deploy %}
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     "use strict";
@@ -32,4 +38,5 @@
     })
   })
 </script>
+{% endif %}
 {% endblock %}

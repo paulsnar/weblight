@@ -65,5 +65,11 @@ a.a-inherited {
 }
 .button:hover { background-color: #696969; cursor: pointer; }
 
+.button--disabled { background-color: #505050; color: #aaa; }
+.button--disabled:hover { background-color: #505050; cursor: not-allowed; }
+
+
 .button--primary { background-color: #1976D2; }
 .button--primary:hover { background-color: #1E88E5; }
+.button--primary.button--disabled,
+  .button--primary.button--disabled:hover { background-color: #11508e; }

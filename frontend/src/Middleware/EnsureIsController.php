@@ -2,12 +2,11 @@
 
 namespace PN\Weblight\Middleware;
 
-use PN\Weblight\Core\{AppContext, MiddlewareInterface};
-use PN\Weblight\HTTP\{Request, Response};
+use PN\Weblight\Core\{MiddlewareInterface, MiddlewareInterrupt};
+use PN\Weblight\HTTP\{DefaultResponses, Request, Response};
 use PN\Weblight\Services\AuthService;
-use PN\Weblight\Core\MiddlewareInterrupt;
 
-class EnsureAuthenticated implements MiddlewareInterface
+class EnsureIsController implements MiddlewareInterface
 {
   /** @var AuthService */
   protected $auth;
@@ -19,8 +18,13 @@ class EnsureAuthenticated implements MiddlewareInterface
 
   public function invoke(Request $rq): ?Response
   {
-    if ( ! $this->auth->isAuthenticated($rq)) {
+    $user = $this->auth->readAuthentication($rq);
+    if ($user === null) {
       return Response::redirectModal($rq, '/auth/login');
+    }
+
+    if ($user->acl->isController !== true) {
+      return DefaultResponses::forbidden();
     }
 
     return null;

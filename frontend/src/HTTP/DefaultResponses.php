@@ -22,7 +22,7 @@ HTML;
 
 const MESSAGE_FORBIDDEN = <<<'HTML'
 <!DOCTYPE html>
-<article>Atvainojiet, bet jums nav atļauts tā rīkoties.</article>
+<article>Atvainojiet, bet jums nav piekļuves šai lapai.</article>
 
 HTML;
 
