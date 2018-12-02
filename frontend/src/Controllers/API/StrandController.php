@@ -40,7 +40,7 @@ class StrandController extends BaseAPIController
 
     try {
       $this->strand->deployProgram($ref, $revision);
-      return new Response(Response::HTTP_CREATED);
+      return new Response(Response::HTTP_ACCEPTED);
     } catch (EventSubmissionError $e) {
       $this->log->dispatch([
         'type' => 'event-failure', 'result' => $e->getMessage() ]);
