@@ -4,25 +4,25 @@ namespace PN\Weblight\HTTP;
 
 const MESSAGE_NOT_FOUND = <<<'HTML'
 <!DOCTYPE html>
-<article>Sorry, not found.</article>
+<article>Atvainojiet, šī lapa netika atrasta.</article>
 
 HTML;
 
 const MESSAGE_METHOD_NOT_ALLOWED = <<<'HTML'
 <!DOCTYPE html>
-<article>Sorry, this error occured: <em>Method Not Allowed.</em></article>
+<article>Atvainojiet, notika šāda kļūda: <em>Method Not Allowed.</em></article>
 
 HTML;
 
 const MESSAGE_GENERIC_ERROR = <<<'HTML'
 <!DOCTYPE html>
-<article>Sorry, something went wrong.</article>
+<article>Atvainojiet, kaut kas nogāja greizi.</article>
 
 HTML;
 
 const MESSAGE_FORBIDDEN = <<<'HTML'
 <!DOCTYPE html>
-<article>Sorry, you are forbidden from doing that.</article>
+<article>Atvainojiet, bet jums nav atļauts tā rīkoties.</article>
 
 HTML;
 
