@@ -13,6 +13,7 @@ use PN\Weblight\Controllers\API\{ProgramController as APIProgramController,
   StrandController as APIStrandController};
 use const PN\Weblight\ROOT_PUBLIC;
 use function PN\Weblight\path_join;
+use PN\Weblight\Logging\LogRouter;
 
 class Application
 {
@@ -73,9 +74,11 @@ class Application
 
   public function dispatch()
   {
+    /** @var Response|null */
     $response = null;
 
     try {
+      /** @var ContextfulRequest $request */
       $request = ContextfulRequest::fromGlobals($this->dc);
       $request->ctx = new AppContext($this->dc);
       $handler = $this->routing->dispatch($request);
@@ -86,6 +89,9 @@ class Application
       if ($this->config->values['debug'] ?? false) {
         $response = new DebugErrorResponse($e);
       } else {
+        /** @var LogRouter $log */
+        $log = $this->dc->get(LogRouter::class);
+        $log->dispatch([ 'exception' => $e ]);
         $response = DefaultResponses::internalServerError($e);
       }
     } finally {
