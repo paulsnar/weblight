@@ -8,6 +8,7 @@ begin transaction;
     "is_controller",
     "is_supereditor"
   );
+  create unique index "users_username" on "users" ("username");
 
   insert into "users" values
     (1, "root", "", 1, 1, 1);
