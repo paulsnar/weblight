@@ -42,8 +42,12 @@ class Application
 
       new Route('GET', '/programs',
         new ControllerHandler(ProgramController::class, 'listPrograms')),
+      new Route('GET', '/programs/new',
+        new ControllerHandler(ProgramController::class, 'submitProgram')),
       new Route('GET', '/programs/{program:[a-z0-9]{8}}',
         new ControllerHandler(ProgramController::class, 'showProgram')),
+      new Route('GET', '/programs/{program:[a-z0-9]{8}}/edit',
+        new ControllerHandler(ProgramController::class, 'editProgram')),
 
       new Route('GET', '/api/1/programs',
         new ControllerHandler(APIProgramController::class, 'getProgramList')),

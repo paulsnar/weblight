@@ -77,7 +77,7 @@ class ProgramStorageService
 
   public function createProgram(User $author, string $content): Program
   {
-    return $this->db->transaction(function () use ($content) {
+    return $this->db->transaction(function () use ($author, $content) {
       $program = new Program();
 
       $i = 0;

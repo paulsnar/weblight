@@ -16,6 +16,11 @@
         <button class="button">iepriekšējā versija</button>
       </a>
     {% endif %}
+    {% if can_edit %}
+      <a class="a-inherited" href="/programs/{{ program.ref }}/edit">
+        <button class="button button--success">rediģēt</button>
+      </a>
+    {% endif %}
   </div>
   <pre>{{ program.content }}</pre>
 </div>

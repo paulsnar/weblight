@@ -1,0 +1,53 @@
+{% extends 'layouts/default.html' %}
+
+{% block styles %}
+{{ parent() }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.41.0/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.41.0/theme/monokai.min.css">
+<style>
+  .CodeMirror { min-height: 20rem; height: auto; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="narrow-container">
+  <h1>iesūtīt programmu</h1>
+  <div id="js-codemirror-container"></div>
+  <p><button class="button button--primary" id="js-submit">iesūtīt</button></p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ parent() }}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.41.0/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.41.0/mode/lua/lua.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    "use strict";
+
+    var $code = CodeMirror(
+        document.getElementById('js-codemirror-container'), {
+          theme: 'monokai',
+        }),
+      $submit = document.getElementById('js-submit')
+
+    $submit.addEventListener('click', function() {
+      fetch('/api/1/programs', {
+        method: 'POST',
+        body: $code.getValue(),
+        credentials: 'same-origin',
+      }).then(function(resp) {
+        resp.json().then(function(r) {
+          if (resp.status < 200 || resp.status >= 300) {
+            console.error(r)
+            alert('Atvainojiet, kaut kas nogāja greizi. (skatiet konsoli)')
+            return
+          }
+
+          window.location.href = '/programs/' + r.id
+        })
+      })
+    })
+  })
+</script>
+{% endblock %}

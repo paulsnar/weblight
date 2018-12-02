@@ -22,6 +22,13 @@
 {% block content %}
 <div class="narrow-container">
   <h1>pieejamās programmas</h1>
+  {% if is_programmer %}
+  <p>
+    <a href="/programs/new" class="a-inherited">
+      <button class="button">+ iesūtīt jaunu</button>
+    </a>
+  </p>
+  {% endif %}
   {% for program in programs %}
     <a class="wlproglist-item" href="/programs/{{ program.ref }}">
       <span class="wlproglist-item--id">{{ program.ref }}</span>

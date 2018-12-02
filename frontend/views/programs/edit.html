@@ -1,0 +1,58 @@
+{% extends 'layouts/default.html' %}
+
+{% block styles %}
+{{ parent() }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.41.0/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.41.0/theme/monokai.min.css">
+<style>
+  .CodeMirror { min-height: 20rem; height: auto; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="narrow-container">
+  <h1>rediģēt {{ program.ref }}</h1>
+  <div id="js-codemirror-container"></div>
+  <p><button class="button button--primary" id="js-submit">rediģēt</button></p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ parent() }}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.41.0/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.41.0/mode/lua/lua.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    "use strict";
+
+    var $code = CodeMirror(
+        document.getElementById('js-codemirror-container'), {
+          value: '{{ program.content | e("js") }}',
+          theme: 'monokai',
+        }),
+      $submit = document.getElementById('js-submit')
+
+    $submit.addEventListener('click', function() {
+      fetch('/api/1/programs/{{ program.ref | e("js") }}?revision={{ program.revision | e("js") }}', {
+        method: 'PUT',
+        body: $code.getValue(),
+        credentials: 'same-origin',
+      }).then(function(resp) {
+        resp.json().then(function(r) {
+          if (resp.status === 409) { // Conflict
+            alert('Jūsu rediģēšanas laikā tika iesūtīta jauna versija. Lūdzu, ' +
+              'atsvaidziniet lapu un mēģiniet vēlreiz.')
+              return
+          } else if (resp.status < 200 || resp.status >= 300) {
+            console.error(r)
+            alert('Atvainojiet, kaut kas nogāja greizi.')
+            return
+          }
+
+          window.location.href = '/programs/{{ program.ref | e("js") }}'
+        })
+      })
+    })
+  })
+</script>
+{% endblock %}

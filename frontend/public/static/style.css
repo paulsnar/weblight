@@ -73,3 +73,8 @@ a.a-inherited {
 .button--primary:hover { background-color: #1E88E5; }
 .button--primary.button--disabled,
   .button--primary.button--disabled:hover { background-color: #11508e; }
+
+.button--success { background-color: #388E3C; }
+.button--success:hover { background-color: #3fa044; }
+.button--success.button--disabled,
+  .button--success.button--disabled:hover { background-color: #2a692d; }
