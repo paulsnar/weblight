@@ -47,16 +47,7 @@ class User
       $instance->passwordHash = $row['password'];
     }
 
-    $acl = $instance->acl = new AccessControlList();
-    if (array_key_exists('is_programmer', $row)) {
-      $acl->isProgrammer = $row['is_programmer'] === '1';
-    }
-    if (array_key_exists('is_controller', $row)) {
-      $acl->isController = $row['is_controller'] === '1';
-    }
-    if (array_key_exists('is_supereditor', $row)) {
-      $acl->isSupereditor = $row['is_supereditor'] === '1';
-    }
+    $acl = $instance->acl = AccessControlList::fromRow($row);
 
     return $instance;
   }
