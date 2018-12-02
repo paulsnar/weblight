@@ -48,11 +48,8 @@ class ProgramController extends BaseAPIController
 
   public function getProgram(Request $rq): Response
   {
-    $this->requireMiddleware($rq, EnsureACLLevel::class);
-
     $revision = $rq->query['revision'] ?? 'latest';
 
-    // @throws NotFoundException
     if ($revision === 'latest') {
       $program = $this->programs->getLatestProgram($rq->arguments['program']);
     } else {
