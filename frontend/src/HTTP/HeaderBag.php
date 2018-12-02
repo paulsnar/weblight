@@ -27,7 +27,7 @@ class HeaderBag extends Bag
   public function offsetUnset($k)
     { return parent::offsetUnset(strtolower($k)); }
 
-  public static function fromGlobals()
+  public static function fromGlobals(): self
   {
     $hds = [ ];
     foreach ($_SERVER as $key => $value) {

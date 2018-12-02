@@ -23,14 +23,14 @@ class Environment
     ]);
   }
 
-  public function render(string $name, array $context = [ ])
+  public function render(string $name, array $context = [ ]): string
   {
     $template = $this->twig->load($name);
     return $template->render($context);
   }
 
   public function renderResponse(string $name, array $context = [ ],
-    int $status = Response::HTTP_OK, array $headers = [ ])
+    int $status = Response::HTTP_OK, array $headers = [ ]): Response
   {
     $tpl = $this->render($name, $context);
     return new Response($status, $headers, $tpl);

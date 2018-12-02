@@ -11,7 +11,11 @@ use function PN\Weblight\str_starts_with;
 
 class Router
 {
-  protected $config, $r;
+  /** @var Configuration */
+  protected $config;
+
+  /** @var FRDispatcher */
+  protected $r;
 
   public function __construct(Configuration $config, array $routes)
   {

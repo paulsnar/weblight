@@ -7,6 +7,7 @@ use function PN\Weblight\path_join;
 
 class Configuration
 {
+  /** @var array */
   public $values = [ ];
 
   public function __construct()

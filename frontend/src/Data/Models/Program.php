@@ -6,14 +6,19 @@ use PN\Weblight\Data\BaseModel;
 
 class Program extends BaseModel implements \JsonSerializable
 {
-  public $id, $ref, $revision, $content;
+  /** @var int */
+  public $id, $revision;
+  /** @var string */
+  public $ref, $content;
 
+  /** @return array */
   public function jsonSerialize()
   {
     $json = [ 'id' => $this->ref, 'revision' => $this->revision ];
     if (isset($this->content)) {
       $json['content'] = $this->content;
     }
+
     return $json;
   }
 }

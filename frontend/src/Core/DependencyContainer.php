@@ -6,6 +6,7 @@ class DependencyContainer
 {
   private $implementations = [ ], $singletons = [ ], $constructors = [ ];
 
+  /** @return object */
   public function get(string $classOrInterface)
   {
     if ($classOrInterface === static::class) {
@@ -27,6 +28,7 @@ class DependencyContainer
     return $instance;
   }
 
+  /** @return object */
   public function instantiate(string $className)
   {
     $class = new \ReflectionClass($className);

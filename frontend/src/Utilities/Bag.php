@@ -4,7 +4,11 @@ namespace PN\Weblight\Utilities;
 
 class Bag implements \ArrayAccess, \Iterator
 {
-  protected $bag, $iterator;
+  /** @var array */
+  protected $bag;
+
+  /** @var \Iterator|null */
+  protected $iterator;
 
   public function __construct(array $initial = [ ])
   {

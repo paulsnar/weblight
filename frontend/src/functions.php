@@ -2,7 +2,7 @@
 
 namespace PN\Weblight;
 
-function snake_case_to_camel_case(string $source) {
+function snake_case_to_camel_case(string $source): string {
   $words = explode('_', $source);
   $out = array_shift($words);
   $words = array_map('ucfirst', $words);
@@ -10,7 +10,7 @@ function snake_case_to_camel_case(string $source) {
   return $out;
 }
 
-function camel_case_to_snake_case(string $source) {
+function camel_case_to_snake_case(string $source): string {
   if (strlen($source) < 1) {
     return '';
   }
@@ -30,11 +30,11 @@ function camel_case_to_snake_case(string $source) {
   return implode('_', $words);
 }
 
-function str_starts_with(string $needle, string $haystack) {
+function str_starts_with(string $needle, string $haystack): bool {
   return substr($haystack, 0, strlen($needle)) === $needle;
 }
 
-function str_ends_with(string $needle, string $haystack) {
+function str_ends_with(string $needle, string $haystack): bool {
   return substr($haystack, 0, -1 * strlen($needle)) === $needle;
 }
 
@@ -42,6 +42,7 @@ function array_pick(array $array) {
   return $array[array_rand($array)];
 }
 
+/** @return int|false */
 function maskpos(string $haystack, string $needles, int $offset = 0) {
   $needles = str_split($needles);
   $min = INF;
@@ -62,7 +63,7 @@ function maskpos(string $haystack, string $needles, int $offset = 0) {
   return $min;
 }
 
-function path_normalize(string $path) {
+function path_normalize(string $path): string {
   $safePath = [ ];
   foreach (explode('/', $path) as $component) {
     if ($component === '..') {

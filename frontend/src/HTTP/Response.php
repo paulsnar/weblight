@@ -71,8 +71,18 @@ class Response
     HTTP_NOT_EXTENDED = 510,
     HTTP_NETWORK_AUTHENTICATION_REQUIRED = 511;
 
-  public $status, $headers, $body;
+  /** @var int */
+  public $status;
 
+  /** @var string[] */
+  public $headers;
+
+  /** @var string|resource|null */
+  public $body;
+
+  /**
+   * @param string|resource|null $body
+   */
   public function __construct(int $status = 204, array $headers = [], $body = null)
   {
     $this->status = $status;
@@ -106,7 +116,7 @@ class Response
     }
   }
 
-  public static function redirectTo(string $targetPath)
+  public static function redirectTo(string $targetPath): self
   {
     $url = htmlspecialchars($targetPath, ENT_QUOTES | ENT_HTML5);
     $msg = <<<HTML

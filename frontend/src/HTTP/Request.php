@@ -8,16 +8,20 @@ class Request
 {
   /** @var string */
   public $method, $path, $body;
+
   /** @var Bag */
   public $headers, $query, $form, $files, $cookies;
+
   /** @var array */
   public $arguments = [ ], $properties = [ ];
+
   /** @var Authentication|null */
   public $authentication;
+
   /** @var Session */
   public $session;
 
-  public static function fromGlobals()
+  public static function fromGlobals(): self
   {
     $rq = new static();
 

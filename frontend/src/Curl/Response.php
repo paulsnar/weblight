@@ -6,7 +6,14 @@ use PN\Weblight\HTTP\HeaderBag;
 
 class Response
 {
-  public $status, $headers, $body;
+  /** @var int */
+  public $status;
+
+  /** @var string[] */
+  public $headers;
+
+  /** @var string */
+  public $body;
 
   public function __construct(int $status, array $headers, string $body)
   {

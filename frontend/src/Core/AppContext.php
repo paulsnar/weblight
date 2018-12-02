@@ -6,7 +6,11 @@ use PN\Weblight\Logging\LogRouter;
 
 class AppContext
 {
-  protected $dc, $logger;
+  /** @var DependencyContainer */
+  protected $dc;
+
+  /** @var LogRouter */
+  protected $logger;
 
   public function __construct(DependencyContainer $dc)
   {

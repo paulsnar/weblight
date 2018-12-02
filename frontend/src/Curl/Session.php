@@ -4,6 +4,7 @@ namespace PN\Weblight\Curl;
 
 class Session
 {
+  /** @var resource */
   protected $ch;
 
   public function __construct()

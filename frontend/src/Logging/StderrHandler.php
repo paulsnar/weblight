@@ -4,6 +4,7 @@ namespace PN\Weblight\Logging;
 
 class StderrHandler
 {
+  /** @var resource */
   protected $stderr;
 
   public function __construct()

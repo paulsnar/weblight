@@ -28,28 +28,28 @@ HTML;
 
 class DefaultResponses
 {
-  public static function notFound()
+  public static function notFound(): Response
   {
     return new Response(Response::HTTP_NOT_FOUND, [
       'Content-Type' => 'text/html; charset=UTF-8',
     ], MESSAGE_NOT_FOUND);
   }
 
-  public static function forbidden()
+  public static function forbidden(): Response
   {
     return new Response(Response::HTTP_FORBIDDEN, [
       'Content-Type' => 'text/html; charset=UTF-8',
     ], MESSAGE_FORBIDDEN);
   }
 
-  public static function methodNotAllowed()
+  public static function methodNotAllowed(): Response
   {
     return new Response(Response::HTTP_METHOD_NOT_ALLOWED, [
       'Content-Type' => 'text/html; charset=UTF-8',
     ], MESSAGE_METHOD_NOT_ALLOWED);
   }
 
-  public static function internalServerError(\Throwable $e)
+  public static function internalServerError(\Throwable $e): Response
   {
     return new Response(Response::HTTP_INTERNAL_SERVER_ERROR, [
       'Content-Type' => 'text/html; charset=UTF-8',

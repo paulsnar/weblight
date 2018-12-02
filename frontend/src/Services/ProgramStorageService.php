@@ -2,16 +2,17 @@
 
 namespace PN\Weblight\Services;
 
-use PN\Weblight\Data\Database;
+use PN\Weblight\Data\{Database, DatabaseException};
 use PN\Weblight\Data\Models\Program;
 use PN\Weblight\Errors\{ConflictException, NotFoundException, SentinelMismatchException};
 use function PN\Weblight\array_pick;
 
 class ProgramStorageService
 {
+  /** @var Database */
   protected $db;
 
-  public static function generateIdentifier()
+  public static function generateIdentifier(): string
   {
     static $_ALPHABET = '123456789abcdefghijkmnopqrstuvwxyz',
            $LENGTH = 8;
@@ -29,6 +30,7 @@ class ProgramStorageService
     $this->db = $db;
   }
 
+  /** @return Program[] */
   public function getProgramStubList()
   {
     $programs = $this->db->selectAll(
@@ -36,7 +38,7 @@ class ProgramStorageService
     return array_map([ Program::class, 'fromDatabaseRow' ], $programs);
   }
 
-  public function getLatestRevision(string $id)
+  public function getLatestRevision(string $id): int
   {
     $row = $this->db->selectOne(
       'select "revision" from "programs" where "ref" = ? order by "revision" desc limit 1',
@@ -48,7 +50,7 @@ class ProgramStorageService
     return intval($row['revision'], 10);
   }
 
-  public function getLatestProgram(string $id)
+  public function getLatestProgram(string $id): Program
   {
     $row = $this->db->selectOne(
       'select * from "programs" where "ref" = ? order by "revision" desc limit 1',
@@ -60,7 +62,7 @@ class ProgramStorageService
     return Program::fromDatabaseRow($row);
   }
 
-  public function getProgram(string $id, int $revision)
+  public function getProgram(string $id, int $revision): Program
   {
     $row = $this->db->selectOne(
       'select * from "programs" where "ref" = ? and "revision" = ?',
@@ -72,7 +74,7 @@ class ProgramStorageService
     return Program::fromDatabaseRow($row);
   }
 
-  public function createProgram(string $content)
+  public function createProgram(string $content): Program
   {
     return $this->db->transaction(function () use ($content) {
       $program = new Program();
@@ -100,7 +102,7 @@ class ProgramStorageService
     });
   }
 
-  public function insertNewRevision(Program $program, string $newContent)
+  public function insertNewRevision(Program $program, string $newContent): Program
   {
     return $this->db->transaction(function () use ($program, $newContent) {
       $latestRevision = $this->db->selectOne(

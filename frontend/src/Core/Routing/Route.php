@@ -10,9 +10,14 @@ class Route
   /** @var string */
   public $path;
 
-  /** @var ControllerHandler|StaticServeHandler|callable */
+  /** @var HandlerInterface|callable */
   public $handler;
 
+  /**
+   * @param string|string[] $method
+   * @param string $path
+   * @param HandlerInterface|callable $handler
+   */
   public function __construct($method, string $path, $handler)
   {
     $this->method = $method;

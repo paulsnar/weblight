@@ -4,22 +4,21 @@ namespace PN\Weblight\Controllers\API;
 
 use PN\Weblight\API\{BaseAPIController, ErrorResponse, NotImplementedException};
 use PN\Weblight\Core\AppContext;
-use PN\Weblight\Curl\{Request as CurlRequest, Session as CurlSession};
 use PN\Weblight\Events\EventSubmissionError;
 use PN\Weblight\HTTP\{Request as HTTPRequest, Response as HTTPResponse};
 use PN\Weblight\Services\StrandService;
 
 class StrandController extends BaseAPIController
 {
-  protected $ch, $strand;
+  /** @var StrandService */
+  protected $strand;
 
-  public function __construct(CurlSession $ch, StrandService $strand)
+  public function __construct(StrandService $strand)
   {
-    $this->ch = $ch;
     $this->strand = $strand;
   }
 
-  public function deployProgram(AppContext $ctx, HTTPRequest $rq)
+  public function deployProgram(AppContext $ctx, HTTPRequest $rq): Response
   {
     $ref = $rq->form['id'] ?? null;
     if ($ref === null) {
@@ -43,7 +42,7 @@ class StrandController extends BaseAPIController
     }
   }
 
-  public function redeployPreviousProgram(AppContext $ctx, HTTPRequest $rq)
+  public function redeployPreviousProgram(AppContext $ctx, HTTPRequest $rq): Response
   {
     try {
       $this->strand->redeployLastProgram();
@@ -54,7 +53,7 @@ class StrandController extends BaseAPIController
     }
   }
 
-  public function powerOff(AppContext $ctx, HTTPRequest $rq)
+  public function powerOff(AppContext $ctx, HTTPRequest $rq): Response
   {
     try {
       $this->strand->powerOff();

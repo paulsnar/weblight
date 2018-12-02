@@ -10,7 +10,7 @@ class FilePassthroughResponse extends Response
     '.css' => 'text/css',
   ];
 
-  public static function detectMimetype(string $filepath)
+  public static function detectMimetype(string $filepath): string
   {
     $dotpos = strrpos($filepath, '.');
     if ($dotpos === false) {
@@ -30,6 +30,7 @@ class FilePassthroughResponse extends Response
     return $mimetype;
   }
 
+  /** @var string */
   public $filepath;
 
   public function __construct(string $filepath, ?string $mimetype = null,

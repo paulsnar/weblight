@@ -6,7 +6,7 @@ use function PN\Weblight\maskpos;
 
 abstract class Logfmt
 {
-  public static function encode(array $items)
+  public static function encode(array $items): string
   {
     $out = '';
     $arraySentinel = -1;

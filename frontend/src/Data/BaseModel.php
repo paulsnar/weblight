@@ -6,7 +6,7 @@ use function PN\Weblight\snake_case_to_camel_case;
 
 class BaseModel
 {
-  public static function fromDatabaseRow(array $row)
+  public static function fromDatabaseRow(array $row): self
   {
     $instance = new static();
     foreach ($row as $attr => $value) {

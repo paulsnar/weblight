@@ -4,7 +4,7 @@ namespace PN\Weblight\Data;
 
 class DatabaseException extends \Exception
 {
-  public static function fromPDOError(array $errorInfo)
+  public static function fromPDOError(array $errorInfo): self
   {
     [ $sqlstate, $code, $msg ] = $errorInfo;
     return new static("SQLSTATE {$sqlstate}: {$msg} ({$code})");

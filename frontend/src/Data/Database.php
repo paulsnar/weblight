@@ -4,9 +4,11 @@ namespace PN\Weblight\Data;
 
 use PN\Weblight\Core\Configuration;
 use PN\Weblight\Data\Database\PDOStub;
+use PDO, PDOStatement;
 
 class Database
 {
+  /** @var PDOStub|\PDO */
   protected $db;
 
   public function __construct(Configuration $c)
@@ -20,12 +22,17 @@ class Database
     $this->db = new PDOStub("sqlite:{$filepath}");
   }
 
+  /** @return string|int */
   public function lastInsertId()
   {
-    return $this->db->lastInsertId();
+    $id = $this->db->lastInsertId();
+    if (ctype_digit($id)) {
+      return intval($id, 10);
+    }
+    return $id;
   }
 
-  public function transaction($callback)
+  public function transaction(callable $callback)
   {
     $this->db->beginTransaction();
     $committed = false;
@@ -45,7 +52,8 @@ class Database
     return $result;
   }
 
-  public function query($query, $params = [ ])
+  /** @throws DatabaseException */
+  public function query(string $query, array $params = [ ]): PDOStatement
   {
     $q = $this->db->prepare($query);
     if ($q === false) {
@@ -76,7 +84,8 @@ class Database
     return $q;
   }
 
-  public function selectOne($query, $params = [ ])
+  /** @throws DatabaseException */
+  public function selectOne(string $query, array $params = [ ]): ?array
   {
     $q = $this->query($query, $params);
     $row = $q->fetch(\PDO::FETCH_ASSOC);
@@ -86,7 +95,8 @@ class Database
     return $row;
   }
 
-  public function selectAll($query, $params = [ ])
+  /** @throws DatabaseException */
+  public function selectAll(string $query, array $params = [ ]): array
   {
     $q = $this->query($query, $params);
     return $q->fetchAll(\PDO::FETCH_ASSOC);
