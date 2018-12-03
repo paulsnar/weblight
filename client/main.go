@@ -9,8 +9,7 @@ import (
 )
 
 func main() {
-  // es, err := NewEventSource("https://wl.xn--t-oha.lv/api/1-realtime/strand")
-  es, err := NewEventSource("http://127.0.14.1:8000/consume")
+  es, err := NewEventSource("https://wl.xn--t-oha.lv/api/1-realtime/strand")
   if err != nil {
     panic(err)
   }
@@ -85,6 +84,13 @@ func main() {
       return err
     }
 
+    if p != nil {
+      if err := ExitLightbridge(p); err != nil {
+        return err
+      }
+      p = nil
+    }
+
     programId := ProgramID{programSpecifier[0], uint(rev)}
 
     if cacheHasProgram(programId) {
@@ -103,13 +109,6 @@ func main() {
     programPath, err := cacheStoreProgram(programId, program)
     if err != nil {
       return err
-    }
-
-    if p != nil {
-      if err := ExitLightbridge(p); err != nil {
-        return err
-      }
-      p = nil
     }
 
     p, err = LaunchLightbridge(programPath)
