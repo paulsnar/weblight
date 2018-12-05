@@ -16,7 +16,6 @@ func main() {
   defer es.Close()
 
   var p *os.Process
-  strandOn := false
 
   go func() {
     t := time.NewTicker(30 * time.Second)
@@ -25,7 +24,7 @@ func main() {
     for {
       // ensure that the strand stays off
       <-t.C
-      if !strandOn {
+      if p == nil {
         p, _ := LaunchLightbridge("/dev/null")
         if p != nil {
           p.Wait()
@@ -46,7 +45,6 @@ func main() {
     }
     p = nil
 
-    strandOn = false
     return nil
   }
 
@@ -70,7 +68,6 @@ func main() {
       return err
     }
 
-    strandOn = true
     return nil
   }
 
@@ -116,7 +113,6 @@ func main() {
       return err
     }
 
-    strandOn = true
     return nil
   }
 
