@@ -1,46 +1,46 @@
 package main
 
 import (
-  "os"
-  "syscall"
-  "time"
+	"os"
+	"syscall"
+	"time"
 )
 
-func awaitProcessExit(p *os.Process, c chan<- error) {
-  _, err := p.Wait()
-  c <- err
-  close(c)
+type lightbridgeProcess struct {
+	p *os.Process
 }
 
-func ExitLightbridge(p *os.Process) error {
-  c := make(chan error)
+func lightbridgeLaunch(programPath string) (*lightbridgeProcess, error) {
+	p, err := os.StartProcess("./lb2", []string{"./lb2", programPath}, &os.ProcAttr{
+		Files: []*os.File{os.Stdin, os.Stdout, os.Stderr},
+	})
 
-  p.Signal(syscall.SIGTERM)
-  go awaitProcessExit(p, (chan<- error)(c))
-  t := time.NewTimer(2 * time.Second)
-
-  for {
-    select {
-      case err := <-c:
-        t.Stop()
-        return err
-
-      case <-t.C:
-        p.Kill()
-    }
-  }
+	if err != nil {
+		return nil, err
+	}
+	t := time.Now()
+	os.Chtimes(programPath, t, t)
+	return &lightbridgeProcess{p}, nil
 }
 
-func LaunchLightbridge(programPath string) (p *os.Process, err error) {
-  p, err = os.StartProcess("./lb2", []string{"./lb2", programPath}, &os.ProcAttr{
-    Files: []*os.File{os.Stdin, os.Stdout, os.Stderr},
-  })
+func (proc lightbridgeProcess) Exit() error {
+	c := make(chan error)
 
-  go func() {
-    // refresh last-modified timestamp
-    t := time.Now()
-    os.Chtimes(programPath, t, t)
-  }()
+	proc.p.Signal(syscall.SIGINT)
+	go func() {
+		_, err := proc.p.Wait()
+		c <- err
+	}()
+	t := time.NewTimer(3 * time.Second)
 
-  return
+	for {
+		select {
+		case err := <-c:
+			t.Stop()
+			return err
+
+		case <-t.C:
+			proc.p.Kill()
+		}
+	}
 }

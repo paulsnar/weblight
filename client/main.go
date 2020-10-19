@@ -1,124 +1,196 @@
 package main
 
 import (
-  "fmt"
-  "os"
-  "strconv"
-  "strings"
-  "time"
+	"bytes"
+	"fmt"
+	"net/http"
+	"time"
 )
 
-func main() {
-  es, err := NewEventSource("https://wl.xn--t-oha.lv/api/1-realtime/strand")
-  if err != nil {
-    panic(err)
-  }
-  defer es.Close()
+var programRoot = "./programs"
 
-  var p *os.Process
-
-  go func() {
-    t := time.NewTicker(30 * time.Second)
-    defer t.Stop()
-
-    for {
-      // ensure that the strand stays off
-      <-t.C
-      if p == nil {
-        p, _ := LaunchLightbridge("/dev/null")
-        if p != nil {
-          p.Wait()
-        }
-      }
-    }
-  }()
-
-  es.Handlers["off"] = func(ev *Event) error {
-    if p != nil {
-      if err := ExitLightbridge(p); err != nil {
-        return err
-      }
-    }
-    p, _ = LaunchLightbridge("/dev/null")
-    if p != nil {
-      p.Wait()
-    }
-    p = nil
-
-    return nil
-  }
-
-  es.Handlers["launch-last"] = func(ev *Event) error {
-    if p != nil {
-      if err := ExitLightbridge(p); err != nil {
-        return err
-      }
-      p = nil
-    }
-
-    program := cacheFindLastProgram()
-    if program == "" {
-      // should report failure?
-      return nil
-    }
-
-    var err error
-    p, err = LaunchLightbridge(program)
-    if err != nil {
-      return err
-    }
-
-    return nil
-  }
-
-  es.Handlers["launch"] = func(ev *Event) error {
-    programSpecifier := strings.Split(string(ev.Data), "-")
-    if len(programSpecifier) != 2 {
-      return fmt.Errorf("invalid program specifier: %s", ev.Data)
-    }
-    rev, err := strconv.ParseUint(programSpecifier[1], 10, 64)
-    if err != nil {
-      return err
-    }
-
-    if p != nil {
-      if err := ExitLightbridge(p); err != nil {
-        return err
-      }
-      p = nil
-    }
-
-    programId := ProgramID{programSpecifier[0], uint(rev)}
-
-    if cacheHasProgram(programId) {
-      p, err = LaunchLightbridge(programId.FullPath())
-      if err != nil {
-        return err
-      }
-
-      return nil
-    }
-
-    program, err := FetchProgram(programId)
-    if err != nil {
-      return err
-    }
-    programPath, err := cacheStoreProgram(programId, program)
-    if err != nil {
-      return err
-    }
-
-    p, err = LaunchLightbridge(programPath)
-    if err != nil {
-      return err
-    }
-
-    return nil
-  }
-
-  if err := es.Loop(); err != nil {
-    fmt.Printf("error: %s\n", err)
-    os.Exit(1)
-  }
+type programId struct {
+	ID       string
+	Revision uint32
 }
 
+func (id *programId) IsEmpty() bool {
+	return id.ID == "" && id.Revision == 0
+}
+func (id *programId) String() string {
+	return fmt.Sprintf("%s.%d", id.ID, id.Revision)
+}
+func (id *programId) Path() string {
+	return id.String() + ".lua"
+}
+
+func fetchProgram(id programId) ([]byte, error) {
+	url := fmt.Sprintf("http://weblight/api/1/programs/%s?revision=%d", id.ID, id.Revision)
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	b := new(bytes.Buffer)
+	if _, err := b.ReadFrom(resp.Body); err != nil {
+		return nil, err
+	}
+
+	return b.Bytes(), nil
+}
+
+func clientReader(c chan<- *clientEvent) {
+	b := newExponentialBackoff(20*time.Millisecond, 10*time.Second)
+
+	loop := func() (stop bool) {
+		defer func() {
+			// might panic on send when c is closed
+			// but that's okay
+			if p := recover(); p != nil {
+				stop = true
+			}
+		}()
+
+		client, err := clientConnect("weblight")
+		if err != nil {
+			fmt.Printf("warning: couldn't connect: %s, retrying soon\n", err)
+			b.Fail()
+			return
+		}
+		b.Succeed()
+
+		for {
+			event, err := client.ReadNextEvent()
+			if err != nil {
+				fmt.Printf("warning: couldn't read event: %s, reconnecting\n", err)
+				b.Fail()
+				return
+			}
+
+			c <- event
+		}
+	}
+
+	for loop() {
+	}
+}
+
+func turnerOffer(c <-chan bool) {
+	var t *time.Ticker
+	var tc <-chan time.Time
+
+	for {
+		select {
+		case enable, ok := <-c:
+			if !ok {
+				return
+			}
+
+			if t != nil {
+				t.Stop()
+				t = nil
+				tc = nil
+			}
+			if enable {
+				t := time.NewTicker(30 * time.Second)
+				tc = t.C
+			}
+
+		case <-tc:
+			proc, err := lightbridgeLaunch("/dev/null")
+			if err != nil {
+				fmt.Printf("warning: failed to clear: %s\n", err)
+			} else {
+				proc.p.Wait()
+			}
+		}
+	}
+}
+
+func runLast() (*lightbridgeProcess, error) {
+	prog := cacheFindLastProgram()
+	if prog == "" {
+		fmt.Printf("warning: requested run last but no program found\n")
+		return nil, nil
+	}
+
+	proc, err := lightbridgeLaunch(prog)
+	return proc, err
+}
+
+func run(id programId) (*lightbridgeProcess, error) {
+	if cacheHasProgram(id) {
+		proc, err := lightbridgeLaunch(programRoot + "/" + id.Path())
+		return proc, err
+	}
+
+	prog, err := fetchProgram(id)
+	if err != nil {
+		return nil, err
+	}
+
+	path, err := cacheStoreProgram(id, prog)
+	if err != nil {
+		return nil, err
+	}
+
+	proc, err := lightbridgeLaunch(path)
+	return proc, err
+}
+
+func main() {
+	events := make(chan *clientEvent)
+	turnerOfferEnable := make(chan bool)
+
+	go clientReader((chan<- *clientEvent)(events))
+	go turnerOffer((<-chan bool)(turnerOfferEnable))
+
+	var proc *lightbridgeProcess
+	var err error
+
+	turnerOfferEnable <- true
+
+	procExit := func() {
+		if proc == nil {
+			return
+		}
+		if err := proc.Exit(); err != nil {
+			fmt.Printf("warning: failed to exit program: %s\n", err)
+			proc.p.Kill()
+		}
+		proc = nil
+	}
+
+	for {
+		select {
+		case event := <-events:
+			switch event.Type {
+			case clientEventRunLast:
+				turnerOfferEnable <- false
+				procExit()
+				proc, err = runLast()
+				if err != nil {
+					fmt.Printf("warning: failed to run last: %s\n", err)
+					turnerOfferEnable <- true
+				}
+
+			case clientEventRun:
+				turnerOfferEnable <- false
+				procExit()
+				proc, err = run(event.Program)
+				if err != nil {
+					fmt.Printf("warning: failed to run %s: %s\n", event.Program, err)
+					turnerOfferEnable <- true
+				}
+
+			case clientEventStop:
+				procExit()
+				turnerOfferEnable <- true
+
+			case clientEventNoop:
+				// do nothing…
+			}
+		}
+	}
+}
