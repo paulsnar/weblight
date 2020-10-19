@@ -8,7 +8,7 @@ use PN\Weblight\HTTP\Response;
 
 class StrandEventPusherService
 {
-  protected const EVENT_SERVER_ADDRESS = 'http://127.0.14.1:8000';
+  protected const EVENT_SERVER_ADDRESS = 'http://weblight:8080';
 
   protected static function encodeJSON(array $obj)
   {
@@ -24,16 +24,16 @@ class StrandEventPusherService
 
   public function sendEvent(string $event, ?string $data = null)
   {
-    $ev = [ 'event' => $event ];
+    $url = static::EVENT_SERVER_ADDRESS . '/submit';
+    $url .= '?event=' . rawurlencode($event);
     if ($data !== null) {
-      $ev['data'] = $data;
+      $url .= '&data=' . rawurlencode($data);
     }
 
-    $rq = Request::post(static::EVENT_SERVER_ADDRESS . '/submit',
-      static::encodeJSON($ev));
+    $rq = Request::post($url);
 
     $resp = $this->ch->perform($rq);
-    if ($resp->status !== Response::HTTP_CREATED) {
+    if ($resp->status !== Response::HTTP_NO_CONTENT) {
       throw new EventSubmissionError($resp->body);
     }
   }
